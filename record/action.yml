@@ -1,0 +1,22 @@
+name: supersonic-ci record
+description: Record that this job passed on a lane's inputs hash. Writes nothing unless the whole job succeeds.
+author: Dryft
+branding:
+  icon: check-circle
+  color: blue
+inputs:
+  lane:
+    description: Lane name, as given to supersonic-ci check.
+    required: true
+  hash:
+    description: The lane's hash from supersonic-ci check. Empty means record nothing.
+    required: true
+  key-prefix:
+    description: Must match the key-prefix given to supersonic-ci check.
+    required: false
+    default: supersonic-ci
+runs:
+  using: node24
+  main: dist/main.mjs
+  post: dist/post.mjs
+  post-if: success()

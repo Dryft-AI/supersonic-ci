@@ -1,0 +1,30 @@
+name: supersonic-ci check
+description: Hash each lane's input files and report which lanes already passed on exactly those inputs.
+author: Dryft
+branding:
+  icon: fast-forward
+  color: blue
+inputs:
+  lanes:
+    description: YAML map of lane name to a list of git pathspecs, or to {paths, salt}.
+    required: true
+  salt:
+    description: Extra text mixed into every lane's hash. Change it to invalidate every record.
+    required: false
+    default: ""
+  key-prefix:
+    description: Prefix for the cache keys that hold pass records.
+    required: false
+    default: supersonic-ci
+  working-directory:
+    description: Git checkout to hash. Defaults to GITHUB_WORKSPACE.
+    required: false
+    default: ""
+outputs:
+  hashes:
+    description: JSON object of lane name to inputs hash. Also set as <lane>-hash.
+  passed:
+    description: JSON object of lane name to true if that hash already passed. Also set as <lane>-passed.
+runs:
+  using: node24
+  main: dist/index.mjs

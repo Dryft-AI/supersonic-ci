@@ -35892,6 +35892,10 @@ function setOutput(name, value) {
   process.stdout.write(os5.EOL);
   issueCommand("set-output", { name }, toCommandValue(value));
 }
+function setFailed(message) {
+  process.exitCode = ExitCode.Failure;
+  error(message);
+}
 function isDebug() {
   return process.env["RUNNER_DEBUG"] === "1";
 }
@@ -74298,7 +74302,10 @@ async function jobState(runId, runner, token) {
     if (!response.ok) return "unknown";
     const body2 = await response.json();
     const job = body2.jobs.find((j) => (j.runner_name ?? "").replace(/[^A-Za-z0-9_.-]/g, "_") === runner);
-    if (job) return job.status === "completed" ? "done" : "running";
+    if (job) {
+      if (job.status !== "completed") return "running";
+      return job.conclusion === "failure" ? "failed" : "done";
+    }
     if (body2.jobs.length < 100) break;
   }
   return "done";
@@ -74306,22 +74313,24 @@ async function jobState(runId, runner, token) {
 async function hasPassed(prefix2, lane, hash) {
   return exists2(passKey(prefix2, lane, hash));
 }
-async function inFlight(prefix2, lane, hash, token) {
-  const key = await newestWithPrefix(startedPrefix(prefix2, lane, hash));
-  const started = key ? parseStartedKey(key, prefix2, lane, hash) : void 0;
-  if (!started) return void 0;
-  return await jobState(started.runId, started.runner, token) === "running" ? started.runId : void 0;
-}
 async function waitForResult(prefix2, lane, hash, token, wait, settleEvenIfIdle = false) {
   let waited = settleEvenIfIdle;
   let quietSince;
+  let started;
   while (Date.now() < wait.deadline) {
     if (await hasPassed(prefix2, lane, hash)) {
       return { run: false, reason: waited ? `the earlier job passed on ${hash} while this one waited` : `already passed on ${hash}` };
     }
-    const runId = await inFlight(prefix2, lane, hash, token);
-    if (runId) {
-      if (!waited) info(`Run ${runId} is already testing ${hash}, waiting for its result.`);
+    if (!started) {
+      const key = await newestWithPrefix(startedPrefix(prefix2, lane, hash));
+      started = key ? parseStartedKey(key, prefix2, lane, hash) : void 0;
+    }
+    const state3 = started ? await jobState(started.runId, started.runner, token) : "done";
+    if (state3 === "failed" && waited && started) {
+      return { run: false, failed: true, reason: `the earlier job in run ${started.runId} failed on ${hash}` };
+    }
+    if (state3 === "running") {
+      if (!waited) info(`Run ${started?.runId} is already testing ${hash}, waiting for its result.`);
       waited = true;
       quietSince = void 0;
     } else {
@@ -74356,6 +74365,7 @@ async function run() {
   const result = await waitForResult(prefix2, lane, hash, getInput("github-token"), waitInputs(), true);
   setOutput("run", String(result.run));
   info(`${result.run ? "run" : "skip"}: ${result.reason}`);
+  if (result.failed) setFailed(result.reason);
 }
 run().catch((error2) => {
   warning(`supersonic-ci await failed, so the job will run: ${error2}`);

@@ -13,6 +13,7 @@ async function run(): Promise<void> {
   const result = await waitForResult(prefix, lane, hash, core.getInput("github-token"), waitInputs(), true);
   core.setOutput("run", String(result.run));
   core.info(`${result.run ? "run" : "skip"}: ${result.reason}`);
+  if (result.failed) core.setFailed(result.reason);
 }
 
 run().catch((error) => {

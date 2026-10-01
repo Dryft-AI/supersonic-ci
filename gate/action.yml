@@ -1,5 +1,5 @@
 name: supersonic-ci gate
-description: Decide whether one lane's job should run. Skips it when its inputs already passed, and waits for an earlier run that is testing the same inputs.
+description: Decide whether one lane's job should run. Skips it when its inputs already passed, and inherits the result of an identical job it waits for.
 author: Dryft
 branding:
   icon: clock
@@ -41,7 +41,7 @@ inputs:
     default: ""
 outputs:
   run:
-    description: "'true' if the job should run, 'false' if its inputs already passed."
+    description: "'true' if the job should run. 'false' if its inputs already passed or the action failed because the job it waited for failed."
   hash:
     description: The lane's inputs hash, for supersonic-ci record.
   reason:

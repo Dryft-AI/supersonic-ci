@@ -75566,7 +75566,10 @@ async function jobState(runId, runner, token) {
     if (!response.ok) return "unknown";
     const body2 = await response.json();
     const job = body2.jobs.find((j) => (j.runner_name ?? "").replace(/[^A-Za-z0-9_.-]/g, "_") === runner);
-    if (job) return job.status === "completed" ? "done" : "running";
+    if (job) {
+      if (job.status !== "completed") return "running";
+      return job.conclusion === "failure" ? "failed" : "done";
+    }
     if (body2.jobs.length < 100) break;
   }
   return "done";

@@ -4,7 +4,22 @@ import * as cache from "@actions/cache";
 import * as core from "@actions/core";
 import { PASS_PATH } from "./lanes.js";
 
+function stopWatcher(): void {
+  const pid = Number(core.getState("watcher"));
+  if (!pid) return;
+  try {
+    process.kill(-pid, "SIGTERM");
+  } catch {
+    try {
+      process.kill(pid, "SIGTERM");
+    } catch {
+      // Already gone.
+    }
+  }
+}
+
 async function run(): Promise<void> {
+  stopWatcher();
   const key = core.getState("key");
   if (!key) return;
   mkdirSync(dirname(PASS_PATH), { recursive: true });

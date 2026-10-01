@@ -1,0 +1,51 @@
+name: supersonic-ci gate
+description: Decide whether one lane's job should run. Skips it when its inputs already passed, and waits for an earlier run that is testing the same inputs.
+author: Dryft
+branding:
+  icon: clock
+  color: blue
+inputs:
+  lane:
+    description: Lane name.
+    required: true
+  paths:
+    description: The lane's git pathspecs, whitespace-separated or as a YAML list.
+    required: true
+  salt:
+    description: Extra text mixed into the hash.
+    required: false
+    default: ""
+  key-prefix:
+    description: Prefix for the cache keys.
+    required: false
+    default: supersonic-ci
+  github-token:
+    description: Token used to ask whether the earlier job is still running.
+    required: false
+    default: ${{ github.token }}
+  poll-seconds:
+    description: How often to check on the earlier job while waiting.
+    required: false
+    default: "10"
+  settle-seconds:
+    description: How long to keep looking after the earlier job ends, for its pass record to land.
+    required: false
+    default: "30"
+  max-wait-minutes:
+    description: Give up waiting and run after this long.
+    required: false
+    default: "45"
+  working-directory:
+    description: Git checkout to hash. Defaults to GITHUB_WORKSPACE.
+    required: false
+    default: ""
+outputs:
+  run:
+    description: "'true' if the job should run, 'false' if its inputs already passed."
+  hash:
+    description: The lane's inputs hash, for supersonic-ci record.
+  reason:
+    description: Why the gate decided what it did.
+runs:
+  using: node24
+  main: dist/index.mjs

@@ -23,7 +23,7 @@ jobs:
       - name: Check dist is up to date
         run: |
           pnpm build
-          git diff --exit-code -- check/dist record/dist \
+          git diff --exit-code -- check/dist record/dist gate/dist \
             || { echo "::error::dist is stale, run pnpm build and commit it"; exit 1; }
 
   first-check:
@@ -49,6 +49,7 @@ jobs:
         with:
           lane: self
           hash: ${{ needs.first-check.outputs.hash }}
+          watch: "false"
       - run: echo "the job's real work would run here"
 
   second-check:
@@ -67,3 +68,77 @@ jobs:
           test "${{ needs.first-check.outputs.passed }}" = "false"
           test "${{ steps.check.outputs.self-hash }}" = "${{ needs.first-check.outputs.hash }}"
           test "${{ steps.check.outputs.self-passed }}" = "true"
+
+  slow-pass:
+    runs-on: ubuntu-latest
+    outputs:
+      hash: ${{ steps.gate.outputs.hash }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: gate
+        uses: ./gate
+        with:
+          lane: waiting
+          paths: src
+          salt: e2e-wait-${{ github.run_id }}-${{ github.run_attempt }}
+      - uses: ./record
+        with:
+          lane: waiting
+          hash: ${{ steps.gate.outputs.hash }}
+          watch: "false"
+      - run: sleep 60
+
+  waiter:
+    runs-on: ubuntu-latest
+    steps:
+      - run: sleep 25
+      - uses: actions/checkout@v4
+      - id: gate
+        uses: ./gate
+        with:
+          lane: waiting
+          paths: src
+          salt: e2e-wait-${{ github.run_id }}-${{ github.run_attempt }}
+          poll-seconds: "5"
+      - name: The gate waited for the slow job and then skipped
+        run: |
+          echo "reason: ${{ steps.gate.outputs.reason }}"
+          test "${{ steps.gate.outputs.run }}" = "false"
+
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: gate
+        uses: ./gate
+        with:
+          lane: stale
+          paths: src
+          salt: e2e-old-${{ github.run_id }}-${{ github.run_attempt }}
+      - uses: ./record
+        with:
+          lane: stale
+          hash: ${{ steps.gate.outputs.hash }}
+          poll-seconds: "5"
+      - id: work
+        continue-on-error: true
+        run: |
+          date +%s > "$RUNNER_TEMP/work-start"
+          sleep 240
+      - name: The watcher stopped the work step well before it finished
+        run: |
+          test "${{ steps.work.outcome }}" = "failure"
+          elapsed=$(( $(date +%s) - $(cat "$RUNNER_TEMP/work-start") ))
+          echo "work step stopped after ${elapsed}s"
+          test "$elapsed" -lt 150
+
+  newer-push:
+    runs-on: ubuntu-latest
+    steps:
+      - run: sleep 40
+      - uses: actions/checkout@v4
+      - uses: ./gate
+        with:
+          lane: stale
+          paths: src
+          salt: e2e-new-${{ github.run_id }}-${{ github.run_attempt }}

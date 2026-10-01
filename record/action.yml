@@ -1,20 +1,32 @@
 name: supersonic-ci record
-description: Record that this job passed on a lane's inputs hash. Writes nothing unless the whole job succeeds.
+description: Record that this job passed on a lane's inputs hash, and stop the job early if a newer push changes the lane.
 author: Dryft
 branding:
   icon: check-circle
   color: blue
 inputs:
   lane:
-    description: Lane name, as given to supersonic-ci check.
+    description: Lane name, as given to supersonic-ci check or gate.
     required: true
   hash:
-    description: The lane's hash from supersonic-ci check. Empty means record nothing.
+    description: The lane's hash from check or gate. Empty means record nothing and watch nothing.
     required: true
   key-prefix:
-    description: Must match the key-prefix given to supersonic-ci check.
+    description: Must match check or gate.
     required: false
     default: supersonic-ci
+  save:
+    description: Set to false on jobs that are only part of a lane, such as matrix shards, so only the job that sums them up records the pass.
+    required: false
+    default: "true"
+  watch:
+    description: Stop this job's running step when a newer push changes the lane. Linux runners only.
+    required: false
+    default: "true"
+  poll-seconds:
+    description: How often the watcher checks for a newer push.
+    required: false
+    default: "15"
 runs:
   using: node24
   main: dist/main.mjs

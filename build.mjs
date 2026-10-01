@@ -5,6 +5,8 @@ const entries = [
   ["src/check.ts", "check/dist/index.mjs"],
   ["src/record-main.ts", "record/dist/main.mjs"],
   ["src/record-post.ts", "record/dist/post.mjs"],
+  ["src/watch.ts", "record/dist/watch.mjs"],
+  ["src/gate.ts", "gate/dist/index.mjs"],
 ];
 for (const [entry, outfile] of entries) {
   await build({ entryPoints: [entry], outfile, bundle: true, platform: "node", target: "node24", format: "esm", banner, legalComments: "none" });

@@ -1,0 +1,46 @@
+name: supersonic-ci gate
+
+on:
+  workflow_call:
+    inputs:
+      lane:
+        type: string
+        required: true
+      paths:
+        type: string
+        required: true
+      salt:
+        type: string
+        default: ""
+      key-prefix:
+        type: string
+        default: supersonic-ci
+      runs-on:
+        type: string
+        default: ubuntu-latest
+    outputs:
+      run:
+        description: "'true' if the lane's job should run."
+        value: ${{ jobs.gate.outputs.run }}
+      hash:
+        description: The lane's inputs hash, for supersonic-ci record.
+        value: ${{ jobs.gate.outputs.hash }}
+
+jobs:
+  gate:
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 50
+    outputs:
+      run: ${{ steps.gate.outputs.run }}
+      hash: ${{ steps.gate.outputs.hash }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - id: gate
+        uses: Dryft-AI/supersonic-ci/gate@v2
+        with:
+          lane: ${{ inputs.lane }}
+          paths: ${{ inputs.paths }}
+          salt: ${{ inputs.salt }}
+          key-prefix: ${{ inputs.key-prefix }}

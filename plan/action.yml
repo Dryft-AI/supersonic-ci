@@ -1,0 +1,34 @@
+name: supersonic-ci plan
+description: Decide, for every lane at once, whether its job should skip (inputs already passed), wait (an older run is testing the same inputs) or run.
+author: Dryft
+branding:
+  icon: map
+  color: blue
+inputs:
+  lanes:
+    description: YAML map of lane name to a list of git pathspecs, or to {paths, salt}.
+    required: true
+  salt:
+    description: Extra text mixed into every lane's hash.
+    required: false
+    default: ""
+  key-prefix:
+    description: Prefix for the cache keys.
+    required: false
+    default: supersonic-ci
+  github-token:
+    description: Token used to ask whether an older job is still running.
+    required: false
+    default: ${{ github.token }}
+  working-directory:
+    description: Git checkout to hash. Defaults to GITHUB_WORKSPACE.
+    required: false
+    default: ""
+outputs:
+  hashes:
+    description: JSON object of lane name to inputs hash. Also set as <lane>-hash.
+  decisions:
+    description: JSON object of lane name to skip, wait or run. Also set as <lane>-decision.
+runs:
+  using: node24
+  main: dist/index.mjs

@@ -35116,6 +35116,7 @@ var Summary = class {
   }
 };
 var _summary = new Summary();
+var summary = _summary;
 
 // node_modules/.pnpm/@actions+core@3.0.1/node_modules/@actions/core/lib/platform.js
 import os4 from "os";
@@ -35891,6 +35892,10 @@ function setOutput(name, value) {
   }
   process.stdout.write(os5.EOL);
   issueCommand("set-output", { name }, toCommandValue(value));
+}
+function setFailed(message) {
+  process.exitCode = ExitCode.Failure;
+  error(message);
 }
 function isDebug() {
   return process.env["RUNNER_DEBUG"] === "1";
@@ -75543,7 +75548,6 @@ async function newestWithPrefix(keyPrefix) {
 }
 
 // src/inflight.ts
-var sleep2 = (ms) => new Promise((resolve3) => setTimeout(resolve3, ms));
 async function githubApi(path12, token, init = {}) {
   const api = process.env.GITHUB_API_URL ?? "https://api.github.com";
   return fetch(`${api}/repos/${process.env.GITHUB_REPOSITORY}${path12}`, {
@@ -75576,63 +75580,45 @@ async function inFlight(prefix2, lane, hash, token) {
   if (!started) return void 0;
   return await jobState(started.runId, started.runner, token) === "running" ? started.runId : void 0;
 }
-async function waitForResult(prefix2, lane, hash, token, wait, settleEvenIfIdle = false) {
-  let waited = settleEvenIfIdle;
-  let quietSince;
-  while (Date.now() < wait.deadline) {
-    if (await hasPassed(prefix2, lane, hash)) {
-      return { run: false, reason: waited ? `the earlier job passed on ${hash} while this one waited` : `already passed on ${hash}` };
-    }
-    const runId = await inFlight(prefix2, lane, hash, token);
-    if (runId) {
-      if (!waited) info(`Run ${runId} is already testing ${hash}, waiting for its result.`);
-      waited = true;
-      quietSince = void 0;
-    } else {
-      if (!waited) return { run: true, reason: `nothing has passed on ${hash} and nothing is testing it` };
-      quietSince ??= Date.now();
-      if (Date.now() - quietSince >= wait.settleMs) {
-        return { run: true, reason: `the earlier job on ${hash} ended without passing` };
-      }
-    }
-    await sleep2(wait.pollMs);
-  }
-  return { run: true, reason: "gave up waiting for the earlier job" };
-}
-function waitInputs() {
-  return {
-    pollMs: Number(getInput("poll-seconds") || "10") * 1e3,
-    settleMs: Number(getInput("settle-seconds") || "30") * 1e3,
-    deadline: Date.now() + Number(getInput("max-wait-minutes") || "45") * 6e4
-  };
-}
 
-// src/gate.ts
-function decide(run2, hash, reason) {
-  setOutput("run", String(run2));
-  setOutput("hash", hash);
-  setOutput("reason", reason);
-  info(`${run2 ? "run" : "skip"}: ${reason}`);
-}
+// src/plan.ts
 async function run() {
-  const lane = getInput("lane", { required: true });
-  const pathsInput = getInput("paths", { required: true });
+  const lanes = parseLanes(getInput("lanes", { required: true }));
   const prefix2 = getInput("key-prefix") || "supersonic-ci";
+  const salt = getInput("salt");
+  const token = getInput("github-token");
   const cwd = getInput("working-directory") || process.env.GITHUB_WORKSPACE || process.cwd();
-  if (!isFeatureAvailable()) return decide(true, "", "the Actions cache is not available");
-  const paths = pathsInput.trim().startsWith("[") ? parseLanes(`${lane}: ${pathsInput}`)[0].paths : pathsInput.split(/\s+/).filter(Boolean);
-  let hash;
-  try {
-    hash = laneHash({ name: lane, paths, salt: getInput("salt") }, cwd);
-  } catch (error2) {
-    return decide(true, "", `could not hash the lane: ${error2}`);
+  const cacheAvailable = isFeatureAvailable();
+  if (!cacheAvailable) warning("The Actions cache is not available here, so every lane will run.");
+  const hashes = {};
+  const decisions = {};
+  const rows = [];
+  await Promise.all(
+    lanes.map(async (lane) => {
+      let hash = "";
+      try {
+        hash = laneHash(lane, cwd, salt);
+      } catch (error2) {
+        warning(`Could not hash lane "${lane.name}", so it will run: ${error2}`);
+      }
+      let decision = "run";
+      if (cacheAvailable && hash) {
+        await saveNote(headKey(prefix2, lane.name, Date.now(), hash));
+        if (await hasPassed(prefix2, lane.name, hash)) decision = "skip";
+        else if (await inFlight(prefix2, lane.name, hash, token)) decision = "wait";
+      }
+      hashes[lane.name] = hash;
+      decisions[lane.name] = decision;
+      rows.push([lane.name, hash || "none", decision]);
+    })
+  );
+  for (const lane of lanes) {
+    setOutput(`${lane.name}-hash`, hashes[lane.name]);
+    setOutput(`${lane.name}-decision`, decisions[lane.name]);
+    info(`${lane.name}: ${decisions[lane.name]} (${hashes[lane.name] || "no hash"})`);
   }
-  await saveNote(headKey(prefix2, lane, Date.now(), hash));
-  const result = await waitForResult(prefix2, lane, hash, getInput("github-token"), waitInputs());
-  decide(result.run, hash, result.reason);
+  setOutput("hashes", JSON.stringify(hashes));
+  setOutput("decisions", JSON.stringify(decisions));
+  await summary.addHeading("supersonic-ci plan", 3).addTable([[{ data: "Lane", header: true }, { data: "Inputs hash", header: true }, { data: "Decision", header: true }], ...rows]).write();
 }
-run().catch((error2) => {
-  warning(`supersonic-ci gate failed, so the job will run: ${error2}`);
-  setOutput("run", "true");
-  setOutput("hash", "");
-});
+run().catch((error2) => setFailed(`supersonic-ci plan failed: ${error2}`));

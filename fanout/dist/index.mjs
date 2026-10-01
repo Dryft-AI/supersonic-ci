@@ -4083,11 +4083,11 @@ var require_util2 = __commonJS({
     var { isUint8Array } = __require("node:util/types");
     var { webidl } = require_webidl();
     var supportedHashes = [];
-    var crypto3;
+    var crypto2;
     try {
-      crypto3 = __require("node:crypto");
+      crypto2 = __require("node:crypto");
       const possibleRelevantHashes = ["sha256", "sha384", "sha512"];
-      supportedHashes = crypto3.getHashes().filter((hash) => possibleRelevantHashes.includes(hash));
+      supportedHashes = crypto2.getHashes().filter((hash) => possibleRelevantHashes.includes(hash));
     } catch {
     }
     function responseURL(response) {
@@ -4360,7 +4360,7 @@ var require_util2 = __commonJS({
       }
     }
     function bytesMatch(bytes, metadataList) {
-      if (crypto3 === void 0) {
+      if (crypto2 === void 0) {
         return true;
       }
       const parsedMetadata = parseMetadata(metadataList);
@@ -4375,7 +4375,7 @@ var require_util2 = __commonJS({
       for (const item of metadata2) {
         const algorithm = item.algo;
         const expectedValue = item.hash;
-        let actualValue = crypto3.createHash(algorithm).update(bytes).digest("base64");
+        let actualValue = crypto2.createHash(algorithm).update(bytes).digest("base64");
         if (actualValue[actualValue.length - 1] === "=") {
           if (actualValue[actualValue.length - 2] === "=") {
             actualValue = actualValue.slice(0, -2);
@@ -5439,8 +5439,8 @@ var require_body = __commonJS({
     var { multipartFormDataParser } = require_formdata_parser();
     var random;
     try {
-      const crypto3 = __require("node:crypto");
-      random = (max) => crypto3.randomInt(0, max);
+      const crypto2 = __require("node:crypto");
+      random = (max) => crypto2.randomInt(0, max);
     } catch {
       random = (max) => Math.floor(Math.random(max));
     }
@@ -17080,13 +17080,13 @@ var require_frame = __commonJS({
     "use strict";
     var { maxUnsigned16Bit } = require_constants5();
     var BUFFER_SIZE = 16386;
-    var crypto3;
+    var crypto2;
     var buffer3 = null;
     var bufIdx = BUFFER_SIZE;
     try {
-      crypto3 = __require("node:crypto");
+      crypto2 = __require("node:crypto");
     } catch {
-      crypto3 = {
+      crypto2 = {
         // not full compatibility, but minimum.
         randomFillSync: function randomFillSync(buffer4, _offset, _size) {
           for (let i = 0; i < buffer4.length; ++i) {
@@ -17099,7 +17099,7 @@ var require_frame = __commonJS({
     function generateMask() {
       if (bufIdx === BUFFER_SIZE) {
         bufIdx = 0;
-        crypto3.randomFillSync(buffer3 ??= Buffer.allocUnsafe(BUFFER_SIZE), 0, BUFFER_SIZE);
+        crypto2.randomFillSync(buffer3 ??= Buffer.allocUnsafe(BUFFER_SIZE), 0, BUFFER_SIZE);
       }
       return [buffer3[bufIdx++], buffer3[bufIdx++], buffer3[bufIdx++], buffer3[bufIdx++]];
     }
@@ -17171,9 +17171,9 @@ var require_connection = __commonJS({
     var { Headers: Headers2, getHeadersList } = require_headers();
     var { getDecodeSplit } = require_util2();
     var { WebsocketFrameSend } = require_frame();
-    var crypto3;
+    var crypto2;
     try {
-      crypto3 = __require("node:crypto");
+      crypto2 = __require("node:crypto");
     } catch {
     }
     function establishWebSocketConnection(url2, protocols, client, ws, onEstablish, options) {
@@ -17193,7 +17193,7 @@ var require_connection = __commonJS({
         const headersList = getHeadersList(new Headers2(options.headers));
         request.headersList = headersList;
       }
-      const keyValue = crypto3.randomBytes(16).toString("base64");
+      const keyValue = crypto2.randomBytes(16).toString("base64");
       request.headersList.append("sec-websocket-key", keyValue);
       request.headersList.append("sec-websocket-version", "13");
       for (const protocol of protocols) {
@@ -17223,7 +17223,7 @@ var require_connection = __commonJS({
             return;
           }
           const secWSAccept = response.headersList.get("Sec-WebSocket-Accept");
-          const digest = crypto3.createHash("sha1").update(keyValue + uid).digest("base64");
+          const digest = crypto2.createHash("sha1").update(keyValue + uid).digest("base64");
           if (secWSAccept !== digest) {
             failWebsocketConnection(ws, "Incorrect hash received in Sec-WebSocket-Accept header.");
             return;
@@ -19539,7 +19539,7 @@ var require_parse2 = __commonJS({
   "node_modules/.pnpm/semver@7.8.5/node_modules/semver/functions/parse.js"(exports2, module) {
     "use strict";
     var SemVer = require_semver();
-    var parse3 = (version3, options, throwErrors = false) => {
+    var parse4 = (version3, options, throwErrors = false) => {
       if (version3 instanceof SemVer) {
         return version3;
       }
@@ -19552,7 +19552,7 @@ var require_parse2 = __commonJS({
         throw er;
       }
     };
-    module.exports = parse3;
+    module.exports = parse4;
   }
 });
 
@@ -19560,9 +19560,9 @@ var require_parse2 = __commonJS({
 var require_valid = __commonJS({
   "node_modules/.pnpm/semver@7.8.5/node_modules/semver/functions/valid.js"(exports2, module) {
     "use strict";
-    var parse3 = require_parse2();
+    var parse4 = require_parse2();
     var valid = (version3, options) => {
-      const v = parse3(version3, options);
+      const v = parse4(version3, options);
       return v ? v.version : null;
     };
     module.exports = valid;
@@ -19573,9 +19573,9 @@ var require_valid = __commonJS({
 var require_clean = __commonJS({
   "node_modules/.pnpm/semver@7.8.5/node_modules/semver/functions/clean.js"(exports2, module) {
     "use strict";
-    var parse3 = require_parse2();
+    var parse4 = require_parse2();
     var clean2 = (version3, options) => {
-      const s = parse3(version3.trim().replace(/^[=v]+/, ""), options);
+      const s = parse4(version3.trim().replace(/^[=v]+/, ""), options);
       return s ? s.version : null;
     };
     module.exports = clean2;
@@ -19610,10 +19610,10 @@ var require_inc = __commonJS({
 var require_diff = __commonJS({
   "node_modules/.pnpm/semver@7.8.5/node_modules/semver/functions/diff.js"(exports2, module) {
     "use strict";
-    var parse3 = require_parse2();
+    var parse4 = require_parse2();
     var diff = (version1, version22) => {
-      const v1 = parse3(version1, null, true);
-      const v2 = parse3(version22, null, true);
+      const v1 = parse4(version1, null, true);
+      const v2 = parse4(version22, null, true);
       const comparison = v1.compare(v2);
       if (comparison === 0) {
         return null;
@@ -19684,9 +19684,9 @@ var require_patch = __commonJS({
 var require_prerelease = __commonJS({
   "node_modules/.pnpm/semver@7.8.5/node_modules/semver/functions/prerelease.js"(exports2, module) {
     "use strict";
-    var parse3 = require_parse2();
+    var parse4 = require_parse2();
     var prerelease = (version3, options) => {
-      const parsed = parse3(version3, options);
+      const parsed = parse4(version3, options);
       return parsed && parsed.prerelease.length ? parsed.prerelease : null;
     };
     module.exports = prerelease;
@@ -19872,7 +19872,7 @@ var require_coerce = __commonJS({
   "node_modules/.pnpm/semver@7.8.5/node_modules/semver/functions/coerce.js"(exports2, module) {
     "use strict";
     var SemVer = require_semver();
-    var parse3 = require_parse2();
+    var parse4 = require_parse2();
     var { safeRe: re, t } = require_re();
     var coerce = (version3, options) => {
       if (version3 instanceof SemVer) {
@@ -19907,7 +19907,7 @@ var require_coerce = __commonJS({
       const patch = match3[4] || "0";
       const prerelease = options.includePrerelease && match3[5] ? `-${match3[5]}` : "";
       const build = options.includePrerelease && match3[6] ? `+${match3[6]}` : "";
-      return parse3(`${major}.${minor}.${patch}${prerelease}${build}`, options);
+      return parse4(`${major}.${minor}.${patch}${prerelease}${build}`, options);
     };
     module.exports = coerce;
   }
@@ -19917,7 +19917,7 @@ var require_coerce = __commonJS({
 var require_truncate = __commonJS({
   "node_modules/.pnpm/semver@7.8.5/node_modules/semver/functions/truncate.js"(exports2, module) {
     "use strict";
-    var parse3 = require_parse2();
+    var parse4 = require_parse2();
     var constants4 = require_constants6();
     var SemVer = require_semver();
     var truncate = (version3, truncation, options) => {
@@ -19929,7 +19929,7 @@ var require_truncate = __commonJS({
     };
     var cloneInputVersion = (version3, options) => {
       const versionStringToParse = version3 instanceof SemVer ? version3.version : version3;
-      return parse3(versionStringToParse, options);
+      return parse4(versionStringToParse, options);
     };
     var doTruncation = (version3, truncation) => {
       if (isPrerelease(truncation)) {
@@ -20973,7 +20973,7 @@ var require_semver2 = __commonJS({
     var constants4 = require_constants6();
     var SemVer = require_semver();
     var identifiers = require_identifiers();
-    var parse3 = require_parse2();
+    var parse4 = require_parse2();
     var valid = require_valid();
     var clean2 = require_clean();
     var inc = require_inc();
@@ -21012,7 +21012,7 @@ var require_semver2 = __commonJS({
     var simplifyRange = require_simplify();
     var subset = require_subset();
     module.exports = {
-      parse: parse3,
+      parse: parse4,
       valid,
       clean: clean2,
       inc,
@@ -21075,7 +21075,7 @@ var require_ms = __commonJS({
       options = options || {};
       var type = typeof val;
       if (type === "string" && val.length > 0) {
-        return parse3(val);
+        return parse4(val);
       } else if (type === "number" && isFinite(val)) {
         return options.long ? fmtLong(val) : fmtShort(val);
       }
@@ -21083,7 +21083,7 @@ var require_ms = __commonJS({
         "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
       );
     };
-    function parse3(str) {
+    function parse4(str) {
       str = String(str);
       if (str.length > 100) {
         return;
@@ -33523,14 +33523,14 @@ var require_parser = __commonJS({
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs8 = this.flowScalar(this.type);
+              const fs7 = this.flowScalar(this.type);
               if (atNextItem || it.value) {
-                map.items.push({ start, key: fs8, sep: [] });
+                map.items.push({ start, key: fs7, sep: [] });
                 this.onKeyLine = true;
               } else if (it.sep) {
-                this.stack.push(fs8);
+                this.stack.push(fs7);
               } else {
-                Object.assign(it, { key: fs8, sep: [] });
+                Object.assign(it, { key: fs7, sep: [] });
                 this.onKeyLine = true;
               }
               return;
@@ -33658,13 +33658,13 @@ var require_parser = __commonJS({
             case "scalar":
             case "single-quoted-scalar":
             case "double-quoted-scalar": {
-              const fs8 = this.flowScalar(this.type);
+              const fs7 = this.flowScalar(this.type);
               if (!it || it.value)
-                fc.items.push({ start: [], key: fs8, sep: [] });
+                fc.items.push({ start: [], key: fs7, sep: [] });
               else if (it.sep)
-                this.stack.push(fs8);
+                this.stack.push(fs7);
               else
-                Object.assign(it, { key: fs8, sep: [] });
+                Object.assign(it, { key: fs7, sep: [] });
               return;
             }
             case "flow-map-end":
@@ -33872,7 +33872,7 @@ var require_public_api = __commonJS({
       }
       return doc;
     }
-    function parse3(src, reviver, options) {
+    function parse4(src, reviver, options) {
       let _reviver = void 0;
       if (typeof reviver === "function") {
         _reviver = reviver;
@@ -33913,7 +33913,7 @@ var require_public_api = __commonJS({
         return value.toString(options);
       return new Document.Document(value, _replacer, options).toString(options);
     }
-    exports2.parse = parse3;
+    exports2.parse = parse4;
     exports2.parseAllDocuments = parseAllDocuments;
     exports2.parseDocument = parseDocument;
     exports2.stringify = stringify;
@@ -34043,36 +34043,8 @@ function escapeProperty(s) {
   return toCommandValue(s).replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A").replace(/:/g, "%3A").replace(/,/g, "%2C");
 }
 
-// node_modules/.pnpm/@actions+core@3.0.1/node_modules/@actions/core/lib/file-command.js
-import * as crypto from "crypto";
-import * as fs from "fs";
-import * as os2 from "os";
-function issueFileCommand(command, message) {
-  const filePath = process.env[`GITHUB_${command}`];
-  if (!filePath) {
-    throw new Error(`Unable to find environment variable for file command ${command}`);
-  }
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`Missing file at path: ${filePath}`);
-  }
-  fs.appendFileSync(filePath, `${toCommandValue(message)}${os2.EOL}`, {
-    encoding: "utf8"
-  });
-}
-function prepareKeyValueMessage(key, value) {
-  const delimiter3 = `ghadelimiter_${crypto.randomUUID()}`;
-  const convertedValue = toCommandValue(value);
-  if (key.includes(delimiter3)) {
-    throw new Error(`Unexpected input: name should not contain the delimiter "${delimiter3}"`);
-  }
-  if (convertedValue.includes(delimiter3)) {
-    throw new Error(`Unexpected input: value should not contain the delimiter "${delimiter3}"`);
-  }
-  return `${key}<<${delimiter3}${os2.EOL}${convertedValue}${os2.EOL}${delimiter3}`;
-}
-
 // node_modules/.pnpm/@actions+core@3.0.1/node_modules/@actions/core/lib/core.js
-import * as os5 from "os";
+import * as os4 from "os";
 
 // node_modules/.pnpm/@actions+http-client@4.0.1/node_modules/@actions/http-client/lib/index.js
 import * as http from "http";
@@ -34834,7 +34806,7 @@ var BearerCredentialHandler = class {
 };
 
 // node_modules/.pnpm/@actions+core@3.0.1/node_modules/@actions/core/lib/summary.js
-import { EOL as EOL3 } from "os";
+import { EOL as EOL2 } from "os";
 import { constants, promises } from "fs";
 var __awaiter3 = function(thisArg, _arguments, P, generator) {
   function adopt(value) {
@@ -34978,7 +34950,7 @@ var Summary = class {
    * @returns {Summary} summary instance
    */
   addEOL() {
-    return this.addRaw(EOL3);
+    return this.addRaw(EOL2);
   }
   /**
    * Adds an HTML codeblock to the summary buffer
@@ -35118,10 +35090,10 @@ var Summary = class {
 var _summary = new Summary();
 
 // node_modules/.pnpm/@actions+core@3.0.1/node_modules/@actions/core/lib/platform.js
-import os4 from "os";
+import os3 from "os";
 
 // node_modules/.pnpm/@actions+exec@3.0.0/node_modules/@actions/exec/lib/toolrunner.js
-import * as os3 from "os";
+import * as os2 from "os";
 import * as events from "events";
 import * as child from "child_process";
 import * as path3 from "path";
@@ -35131,7 +35103,7 @@ import { ok } from "assert";
 import * as path2 from "path";
 
 // node_modules/.pnpm/@actions+io@3.0.2/node_modules/@actions/io/lib/io-util.js
-import * as fs2 from "fs";
+import * as fs from "fs";
 import * as path from "path";
 var __awaiter4 = function(thisArg, _arguments, P, generator) {
   function adopt(value) {
@@ -35160,9 +35132,9 @@ var __awaiter4 = function(thisArg, _arguments, P, generator) {
     step((generator = generator.apply(thisArg, _arguments || [])).next());
   });
 };
-var { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs2.promises;
+var { chmod, copyFile, lstat, mkdir, open, readdir, rename, rm, rmdir, stat, symlink, unlink } = fs.promises;
 var IS_WINDOWS = process.platform === "win32";
-var READONLY = fs2.constants.O_RDONLY;
+var READONLY = fs.constants.O_RDONLY;
 function exists(fsPath) {
   return __awaiter4(this, void 0, void 0, function* () {
     try {
@@ -35451,12 +35423,12 @@ var ToolRunner = class extends events.EventEmitter {
   _processLineBuffer(data, strBuffer, onLine) {
     try {
       let s = strBuffer + data.toString();
-      let n = s.indexOf(os3.EOL);
+      let n = s.indexOf(os2.EOL);
       while (n > -1) {
         const line = s.substring(0, n);
         onLine(line);
-        s = s.substring(n + os3.EOL.length);
-        n = s.indexOf(os3.EOL);
+        s = s.substring(n + os2.EOL.length);
+        n = s.indexOf(os2.EOL);
       }
       return s;
     } catch (err) {
@@ -35625,7 +35597,7 @@ var ToolRunner = class extends events.EventEmitter {
         }
         const optionsNonNull = this._cloneExecOptions(this.options);
         if (!optionsNonNull.silent && optionsNonNull.outStream) {
-          optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os3.EOL);
+          optionsNonNull.outStream.write(this._getCommandString(optionsNonNull) + os2.EOL);
         }
         const state3 = new ExecState(optionsNonNull, this.toolPath);
         state3.on("debug", (message) => {
@@ -35862,8 +35834,8 @@ function exec(commandLine, args, options) {
 }
 
 // node_modules/.pnpm/@actions+core@3.0.1/node_modules/@actions/core/lib/platform.js
-var platform = os4.platform();
-var arch = os4.arch();
+var platform = os3.platform();
+var arch = os3.arch();
 
 // node_modules/.pnpm/@actions+core@3.0.1/node_modules/@actions/core/lib/core.js
 var ExitCode;
@@ -35884,13 +35856,9 @@ function getInput(name, options) {
   }
   return val.trim();
 }
-function setOutput(name, value) {
-  const filePath = process.env["GITHUB_OUTPUT"] || "";
-  if (filePath) {
-    return issueFileCommand("OUTPUT", prepareKeyValueMessage(name, value));
-  }
-  process.stdout.write(os5.EOL);
-  issueCommand("set-output", { name }, toCommandValue(value));
+function setFailed(message) {
+  process.exitCode = ExitCode.Failure;
+  error(message);
 }
 function isDebug() {
   return process.env["RUNNER_DEBUG"] === "1";
@@ -35905,14 +35873,14 @@ function warning(message, properties = {}) {
   issueCommand("warning", toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 function info(message) {
-  process.stdout.write(message + os5.EOL);
+  process.stdout.write(message + os4.EOL);
 }
 
 // node_modules/.pnpm/@actions+cache@6.3.0/node_modules/@actions/cache/lib/cache.js
 import * as path11 from "path";
 
 // node_modules/.pnpm/@actions+glob@0.7.0/node_modules/@actions/glob/lib/internal-globber.js
-import * as fs3 from "fs";
+import * as fs2 from "fs";
 
 // node_modules/.pnpm/@actions+glob@0.7.0/node_modules/@actions/glob/lib/internal-glob-options-helper.js
 function getOptions(copy) {
@@ -36101,7 +36069,7 @@ function partialMatch(patterns, itemPath) {
 }
 
 // node_modules/.pnpm/@actions+glob@0.7.0/node_modules/@actions/glob/lib/internal-pattern.js
-import * as os6 from "os";
+import * as os5 from "os";
 import * as path7 from "path";
 import assert3 from "assert";
 
@@ -38124,7 +38092,7 @@ var Pattern = class _Pattern {
     if (pattern === "." || pattern.startsWith(`.${path7.sep}`)) {
       pattern = _Pattern.globEscape(process.cwd()) + pattern.substr(1);
     } else if (pattern === "~" || pattern.startsWith(`~${path7.sep}`)) {
-      homedir2 = homedir2 || os6.homedir();
+      homedir2 = homedir2 || os5.homedir();
       assert3(homedir2, "Unable to determine HOME directory");
       assert3(hasAbsoluteRoot(homedir2), `Expected HOME directory to be a rooted path. Actual '${homedir2}'`);
       pattern = _Pattern.globEscape(homedir2) + pattern.substr(1);
@@ -38343,7 +38311,7 @@ var DefaultGlobber = class _DefaultGlobber {
       for (const searchPath of getSearchPaths(patterns)) {
         debug(`Search path '${searchPath}'`);
         try {
-          yield __await(fs3.promises.lstat(searchPath));
+          yield __await(fs2.promises.lstat(searchPath));
         } catch (err) {
           if (err.code === "ENOENT") {
             continue;
@@ -38377,7 +38345,7 @@ var DefaultGlobber = class _DefaultGlobber {
             continue;
           }
           const childLevel = item.level + 1;
-          const childItems = (yield __await(fs3.promises.readdir(item.path))).map((x) => new SearchState(path8.join(item.path, x), childLevel));
+          const childItems = (yield __await(fs2.promises.readdir(item.path))).map((x) => new SearchState(path8.join(item.path, x), childLevel));
           stack.push(...childItems.reverse());
         } else if (match3 & MatchKind.File) {
           yield yield __await(item.path);
@@ -38412,7 +38380,7 @@ var DefaultGlobber = class _DefaultGlobber {
       let stats;
       if (options.followSymbolicLinks) {
         try {
-          stats = yield fs3.promises.stat(item.path);
+          stats = yield fs2.promises.stat(item.path);
         } catch (err) {
           if (err.code === "ENOENT") {
             if (options.omitBrokenSymbolicLinks) {
@@ -38424,10 +38392,10 @@ var DefaultGlobber = class _DefaultGlobber {
           throw err;
         }
       } else {
-        stats = yield fs3.promises.lstat(item.path);
+        stats = yield fs2.promises.lstat(item.path);
       }
       if (stats.isDirectory() && options.followSymbolicLinks) {
-        const realPath = yield fs3.promises.realpath(item.path);
+        const realPath = yield fs2.promises.realpath(item.path);
         while (traversalChain.length >= item.level) {
           traversalChain.pop();
         }
@@ -38478,8 +38446,8 @@ function create(patterns, options) {
 
 // node_modules/.pnpm/@actions+cache@6.3.0/node_modules/@actions/cache/lib/internal/cacheUtils.js
 var semver = __toESM(require_semver2(), 1);
-import * as crypto2 from "crypto";
-import * as fs4 from "fs";
+import * as crypto from "crypto";
+import * as fs3 from "fs";
 import * as path9 from "path";
 import * as util from "util";
 
@@ -38575,13 +38543,13 @@ function createTempDirectory() {
       }
       tempDirectory = path9.join(baseLocation, "actions", "temp");
     }
-    const dest = path9.join(tempDirectory, crypto2.randomUUID());
+    const dest = path9.join(tempDirectory, crypto.randomUUID());
     yield mkdirP(dest);
     return dest;
   });
 }
 function getArchiveFileSizeInBytes(filePath) {
-  return fs4.statSync(filePath).size;
+  return fs3.statSync(filePath).size;
 }
 function resolvePaths(patterns) {
   return __awaiter10(this, void 0, void 0, function* () {
@@ -38619,7 +38587,7 @@ function resolvePaths(patterns) {
 }
 function unlinkFile(filePath) {
   return __awaiter10(this, void 0, void 0, function* () {
-    return util.promisify(fs4.unlink)(filePath);
+    return util.promisify(fs3.unlink)(filePath);
   });
 }
 function getVersion(app_1) {
@@ -38661,7 +38629,7 @@ function getCacheFileName(compressionMethod) {
 }
 function getGnuTarPathOnWindows() {
   return __awaiter10(this, void 0, void 0, function* () {
-    if (fs4.existsSync(GnuTarPathOnWindows)) {
+    if (fs3.existsSync(GnuTarPathOnWindows)) {
       return GnuTarPathOnWindows;
     }
     const versionOutput = yield getVersion("tar");
@@ -38683,7 +38651,7 @@ function getCacheVersion(paths, compressionMethod, enableCrossOsArchive = false)
     components.push("windows-only");
   }
   components.push(versionSalt);
-  return crypto2.createHash("sha256").update(components.join("|")).digest("hex");
+  return crypto.createHash("sha256").update(components.join("|")).digest("hex");
 }
 function getRuntimeToken() {
   const token = process.env["ACTIONS_RUNTIME_TOKEN"];
@@ -38694,7 +38662,7 @@ function getRuntimeToken() {
 }
 
 // node_modules/.pnpm/@actions+cache@6.3.0/node_modules/@actions/cache/lib/internal/cacheHttpClient.js
-import * as fs7 from "fs";
+import * as fs6 from "fs";
 import { URL as URL2 } from "url";
 
 // node_modules/.pnpm/@typespec+ts-http-runtime@0.3.9/node_modules/@typespec/ts-http-runtime/dist/esm/abort-controller/AbortError.js
@@ -38706,11 +38674,11 @@ var AbortError = class extends Error {
 };
 
 // node_modules/.pnpm/@typespec+ts-http-runtime@0.3.9/node_modules/@typespec/ts-http-runtime/dist/esm/logger/log.js
-import { EOL as EOL6 } from "node:os";
+import { EOL as EOL5 } from "node:os";
 import util2 from "node:util";
 import process2 from "node:process";
 function log(message, ...args) {
-  process2.stderr.write(`${util2.format(message, ...args)}${EOL6}`);
+  process2.stderr.write(`${util2.format(message, ...args)}${EOL5}`);
 }
 
 // node_modules/.pnpm/@typespec+ts-http-runtime@0.3.9/node_modules/@typespec/ts-http-runtime/dist/esm/env.js
@@ -39055,7 +39023,7 @@ function createHttpHeaders(rawHeaders) {
 }
 
 // node_modules/.pnpm/@typespec+ts-http-runtime@0.3.9/node_modules/@typespec/ts-http-runtime/dist/esm/util/uuidUtils.js
-function randomUUID3() {
+function randomUUID2() {
   return globalThis.crypto.randomUUID();
 }
 
@@ -39095,7 +39063,7 @@ var PipelineRequestImpl = class {
     this.abortSignal = options.abortSignal;
     this.onUploadProgress = options.onUploadProgress;
     this.onDownloadProgress = options.onDownloadProgress;
-    this.requestId = options.requestId || randomUUID3();
+    this.requestId = options.requestId || randomUUID2();
     this.allowInsecureConnection = options.allowInsecureConnection ?? false;
     this.enableBrowserStreams = options.enableBrowserStreams ?? false;
     this.requestOverrides = options.requestOverrides;
@@ -40463,7 +40431,7 @@ async function concat(sources) {
 
 // node_modules/.pnpm/@typespec+ts-http-runtime@0.3.9/node_modules/@typespec/ts-http-runtime/dist/esm/policies/multipartPolicy.js
 function generateBoundary() {
-  return `----AzSDKFormBoundary${randomUUID3()}`;
+  return `----AzSDKFormBoundary${randomUUID2()}`;
 }
 function encodeHeaders(headers) {
   let result = "";
@@ -40591,14 +40559,14 @@ function redirectPolicy2(options = {}) {
 }
 
 // node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/util/userAgentPlatform.js
-import os7 from "node:os";
+import os6 from "node:os";
 import process4 from "node:process";
 function getHeaderName2() {
   return "User-Agent";
 }
 async function setPlatformSpecificData2(map) {
   if (process4 && process4.versions) {
-    const osInfo = `${os7.type()} ${os7.release()}; ${os7.arch()}`;
+    const osInfo = `${os6.type()} ${os6.release()}; ${os6.arch()}`;
     const versions = process4.versions;
     if (versions.bun) {
       map.set("Bun", `${versions.bun} (${osInfo})`);
@@ -40728,8 +40696,8 @@ function getErrorMessage(e) {
 function isError2(e) {
   return isError(e);
 }
-function randomUUID4() {
-  return randomUUID3();
+function randomUUID3() {
+  return randomUUID2();
 }
 var isNodeLike2 = isNodeLike;
 function uint8ArrayToString2(bytes, format) {
@@ -47692,7 +47660,7 @@ function escapeAttribute(val) {
 }
 
 // node_modules/.pnpm/fast-xml-builder@1.3.1/node_modules/fast-xml-builder/src/orderedJs2Xml.js
-var EOL7 = "\n";
+var EOL6 = "\n";
 function detectXmlVersionFromArray(jArray, options) {
   if (!Array.isArray(jArray) || jArray.length === 0) return "1.0";
   const first = jArray[0];
@@ -47714,7 +47682,7 @@ function resolveTagName(name, isAttribute2, options, matcher, qNameValidator) {
 function toXml(jArray, options) {
   let indentation = "";
   if (options.format) {
-    indentation = EOL7;
+    indentation = EOL6;
   }
   const stopNodeExpressions = [];
   if (options.stopNodes && Array.isArray(options.stopNodes)) {
@@ -67999,7 +67967,7 @@ var BlobLeaseClient = class {
       this._containerOrBlobOperation = clientContext.blob;
     }
     if (!leaseId2) {
-      leaseId2 = randomUUID4();
+      leaseId2 = randomUUID3();
     }
     this._leaseId = leaseId2;
   }
@@ -70279,7 +70247,7 @@ var Batch = class {
 };
 
 // node_modules/.pnpm/@azure+storage-blob@12.31.0/node_modules/@azure/storage-blob/dist/esm/utils/utils.js
-import fs5 from "node:fs";
+import fs4 from "node:fs";
 import util3 from "node:util";
 async function streamToBuffer(stream2, buffer3, offset, end, encoding) {
   let pos = 0;
@@ -70318,7 +70286,7 @@ async function streamToBuffer(stream2, buffer3, offset, end, encoding) {
 }
 async function readStreamToLocalFile(rs, file) {
   return new Promise((resolve3, reject) => {
-    const ws = fs5.createWriteStream(file);
+    const ws = fs4.createWriteStream(file);
     rs.on("error", (err) => {
       reject(err);
     });
@@ -70329,8 +70297,8 @@ async function readStreamToLocalFile(rs, file) {
     rs.pipe(ws);
   });
 }
-var fsStat = util3.promisify(fs5.stat);
-var fsCreateReadStream = fs5.createReadStream;
+var fsStat = util3.promisify(fs4.stat);
+var fsCreateReadStream = fs4.createReadStream;
 
 // node_modules/.pnpm/@azure+storage-blob@12.31.0/node_modules/@azure/storage-blob/dist/esm/Clients.js
 var BlobClient = class _BlobClient extends StorageClient2 {
@@ -72142,7 +72110,7 @@ var BlockBlobClient = class _BlockBlobClient extends BlobClient {
         throw new RangeError(`The buffer's size is too big or the BlockSize is too small;the number of blocks must be <= ${BLOCK_BLOB_MAX_BLOCKS}`);
       }
       const blockList = [];
-      const blockIDPrefix = randomUUID4();
+      const blockIDPrefix = randomUUID3();
       let transferProgress = 0;
       const batch = new Batch(options.concurrency);
       for (let i = 0; i < numBlocks; i++) {
@@ -72223,7 +72191,7 @@ var BlockBlobClient = class _BlockBlobClient extends BlobClient {
     }
     return tracingClient.withSpan("BlockBlobClient-uploadStream", options, async (updatedOptions) => {
       let blockNum = 0;
-      const blockIDPrefix = randomUUID4();
+      const blockIDPrefix = randomUUID3();
       let transferProgress = 0;
       const blockList = [];
       const scheduler = new BufferScheduler(
@@ -73189,7 +73157,7 @@ function uploadCacheArchiveSDK(signedUploadURL, archivePath, options) {
 
 // node_modules/.pnpm/@actions+cache@6.3.0/node_modules/@actions/cache/lib/internal/downloadUtils.js
 import * as buffer2 from "buffer";
-import * as fs6 from "fs";
+import * as fs5 from "fs";
 import * as stream from "stream";
 import * as util4 from "util";
 
@@ -73449,7 +73417,7 @@ var DownloadProgress = class {
 };
 function downloadCacheHttpClient(archiveLocation, archivePath) {
   return __awaiter13(this, void 0, void 0, function* () {
-    const writeStream = fs6.createWriteStream(archivePath);
+    const writeStream = fs5.createWriteStream(archivePath);
     const httpClient = new HttpClient("actions/cache");
     const downloadResponse = yield retryHttpClientResponse("downloadCache", () => __awaiter13(this, void 0, void 0, function* () {
       return httpClient.get(archiveLocation);
@@ -73474,7 +73442,7 @@ function downloadCacheHttpClient(archiveLocation, archivePath) {
 function downloadCacheHttpClientConcurrent(archiveLocation, archivePath, options) {
   return __awaiter13(this, void 0, void 0, function* () {
     var _a2;
-    const archiveDescriptor = yield fs6.promises.open(archivePath, "w");
+    const archiveDescriptor = yield fs5.promises.open(archivePath, "w");
     const httpClient = new HttpClient("actions/cache", void 0, {
       socketTimeout: options.timeoutInMs,
       keepAlive: true
@@ -73590,7 +73558,7 @@ function downloadCacheStorageSDK(archiveLocation, archivePath, options) {
     } else {
       const maxSegmentSize = Math.min(134217728, buffer2.constants.MAX_LENGTH);
       const downloadProgress = new DownloadProgress(contentLength2);
-      const fd = fs6.openSync(archivePath, "w");
+      const fd = fs5.openSync(archivePath, "w");
       try {
         downloadProgress.startDisplayTimer();
         const controller = new AbortController();
@@ -73608,12 +73576,12 @@ function downloadCacheStorageSDK(archiveLocation, archivePath, options) {
             controller.abort();
             throw new Error("Aborting cache download as the download time exceeded the timeout.");
           } else if (Buffer.isBuffer(result)) {
-            fs6.writeFileSync(fd, result);
+            fs5.writeFileSync(fd, result);
           }
         }
       } finally {
         downloadProgress.stopDisplayTimer();
-        fs6.closeSync(fd);
+        fs5.closeSync(fd);
       }
     }
   });
@@ -73901,7 +73869,7 @@ function uploadFile(httpClient, cacheId, archivePath, options) {
   return __awaiter14(this, void 0, void 0, function* () {
     const fileSize = getArchiveFileSizeInBytes(archivePath);
     const resourceUrl = getCacheApiUrl(`caches/${cacheId.toString()}`);
-    const fd = fs7.openSync(archivePath, "r");
+    const fd = fs6.openSync(archivePath, "r");
     const uploadOptions = getUploadOptions(options);
     const concurrency = assertDefined("uploadConcurrency", uploadOptions.uploadConcurrency);
     const maxChunkSize = assertDefined("uploadChunkSize", uploadOptions.uploadChunkSize);
@@ -73915,7 +73883,7 @@ function uploadFile(httpClient, cacheId, archivePath, options) {
           const start = offset;
           const end = offset + chunkSize - 1;
           offset += maxChunkSize;
-          yield uploadChunk(httpClient, resourceUrl, () => fs7.createReadStream(archivePath, {
+          yield uploadChunk(httpClient, resourceUrl, () => fs6.createReadStream(archivePath, {
             fd,
             start,
             end,
@@ -73926,7 +73894,7 @@ function uploadFile(httpClient, cacheId, archivePath, options) {
         }
       })));
     } finally {
-      fs7.closeSync(fd);
+      fs6.closeSync(fd);
     }
     return;
   });
@@ -74812,7 +74780,7 @@ function internalCacheTwirpClient(options) {
 }
 
 // node_modules/.pnpm/@actions+cache@6.3.0/node_modules/@actions/cache/lib/internal/tar.js
-import { existsSync as existsSync3, writeFileSync as writeFileSync2 } from "fs";
+import { existsSync as existsSync2, writeFileSync as writeFileSync2 } from "fs";
 import * as path10 from "path";
 var __awaiter16 = function(thisArg, _arguments, P, generator) {
   function adopt(value) {
@@ -74850,7 +74818,7 @@ function getTarPath() {
         const systemTar = SystemTarPathOnWindows;
         if (gnuTar) {
           return { path: gnuTar, type: ArchiveToolType.GNU };
-        } else if (existsSync3(systemTar)) {
+        } else if (existsSync2(systemTar)) {
           return { path: systemTar, type: ArchiveToolType.BSD };
         }
         break;
@@ -75464,27 +75432,14 @@ function saveCacheV2(paths_1, key_1, options_1) {
   });
 }
 
+// src/fanout.ts
+var import_yaml2 = __toESM(require_dist4(), 1);
+
 // src/lanes.ts
 var import_yaml = __toESM(require_dist4(), 1);
 import { execFileSync } from "node:child_process";
 import { createHash as createHash2 } from "node:crypto";
 var PASS_PATH = ".supersonic-ci/pass";
-function parseLanes(text) {
-  const doc = (0, import_yaml.parse)(text);
-  if (!doc || typeof doc !== "object" || Array.isArray(doc)) {
-    throw new Error("`lanes` must be a YAML map of lane name to a list of paths");
-  }
-  return Object.entries(doc).map(([name, spec]) => {
-    if (!/^[A-Za-z0-9_.-]+$/.test(name)) {
-      throw new Error(`lane name "${name}" may only use letters, digits, '.', '_' and '-'`);
-    }
-    const { paths, salt } = Array.isArray(spec) ? { paths: spec, salt: void 0 } : spec ?? {};
-    if (!Array.isArray(paths) || paths.length === 0 || !paths.every((p) => typeof p === "string")) {
-      throw new Error(`lane "${name}" needs a non-empty list of paths`);
-    }
-    return { name, paths, salt: salt == null ? "" : String(salt) };
-  });
-}
 function laneHash(lane, cwd, globalSalt = "") {
   const listing = execFileSync("git", ["ls-files", "--stage", "--", ...lane.paths], {
     cwd,
@@ -75509,15 +75464,6 @@ function headPrefix(prefix2, lane) {
 function headKey(prefix2, lane, epochMs, hash) {
   return `${headPrefix(prefix2, lane)}${String(epochMs).padStart(15, "0")}-${hash}`;
 }
-function startedPrefix(prefix2, lane, hash) {
-  return `${prefix2}-started-${lane}-${hash}-`;
-}
-function parseStartedKey(key, prefix2, lane, hash) {
-  const p = startedPrefix(prefix2, lane, hash);
-  const rest = key.startsWith(p) ? key.slice(p.length) : "";
-  const match3 = /^\d{15}-(\d+)-(.+)$/.exec(rest);
-  return match3 ? { runId: match3[1], runner: match3[2] } : void 0;
-}
 async function saveNote(key) {
   mkdirSync(dirname5(PASS_PATH), { recursive: true });
   writeFileSync3(PASS_PATH, `${process.env.GITHUB_SHA ?? ""}
@@ -75534,16 +75480,8 @@ async function exists2(key) {
     return false;
   }
 }
-async function newestWithPrefix(keyPrefix) {
-  try {
-    return await restoreCache([PASS_PATH], `${keyPrefix}~none`, [keyPrefix], { lookupOnly: true });
-  } catch {
-    return void 0;
-  }
-}
 
 // src/inflight.ts
-var sleep2 = (ms) => new Promise((resolve3) => setTimeout(resolve3, ms));
 async function githubApi(path12, token, init = {}) {
   const api = process.env.GITHUB_API_URL ?? "https://api.github.com";
   return fetch(`${api}/repos/${process.env.GITHUB_REPOSITORY}${path12}`, {
@@ -75556,83 +75494,89 @@ async function githubApi(path12, token, init = {}) {
     }
   });
 }
-async function jobState(runId, runner, token) {
-  for (let page = 1; page <= 5; page++) {
-    const response = await githubApi(`/actions/runs/${runId}/jobs?filter=latest&per_page=100&page=${page}`, token);
-    if (!response.ok) return "unknown";
-    const body2 = await response.json();
-    const job = body2.jobs.find((j) => (j.runner_name ?? "").replace(/[^A-Za-z0-9_.-]/g, "_") === runner);
-    if (job) return job.status === "completed" ? "done" : "running";
-    if (body2.jobs.length < 100) break;
-  }
-  return "done";
-}
 async function hasPassed(prefix2, lane, hash) {
   return exists2(passKey(prefix2, lane, hash));
 }
-async function inFlight(prefix2, lane, hash, token) {
-  const key = await newestWithPrefix(startedPrefix(prefix2, lane, hash));
-  const started = key ? parseStartedKey(key, prefix2, lane, hash) : void 0;
-  if (!started) return void 0;
-  return await jobState(started.runId, started.runner, token) === "running" ? started.runId : void 0;
-}
-async function waitForResult(prefix2, lane, hash, token, wait, settleEvenIfIdle = false) {
-  let waited = settleEvenIfIdle;
-  let quietSince;
-  while (Date.now() < wait.deadline) {
-    if (await hasPassed(prefix2, lane, hash)) {
-      return { run: false, reason: waited ? `the earlier job passed on ${hash} while this one waited` : `already passed on ${hash}` };
-    }
-    const runId = await inFlight(prefix2, lane, hash, token);
-    if (runId) {
-      if (!waited) info(`Run ${runId} is already testing ${hash}, waiting for its result.`);
-      waited = true;
-      quietSince = void 0;
-    } else {
-      if (!waited) return { run: true, reason: `nothing has passed on ${hash} and nothing is testing it` };
-      quietSince ??= Date.now();
-      if (Date.now() - quietSince >= wait.settleMs) {
-        return { run: true, reason: `the earlier job on ${hash} ended without passing` };
-      }
-    }
-    await sleep2(wait.pollMs);
-  }
-  return { run: true, reason: "gave up waiting for the earlier job" };
-}
-function waitInputs() {
-  return {
-    pollMs: Number(getInput("poll-seconds") || "10") * 1e3,
-    settleMs: Number(getInput("settle-seconds") || "30") * 1e3,
-    deadline: Date.now() + Number(getInput("max-wait-minutes") || "45") * 6e4
-  };
-}
 
-// src/gate.ts
-function decide(run2, hash, reason) {
-  setOutput("run", String(run2));
-  setOutput("hash", hash);
-  setOutput("reason", reason);
-  info(`${run2 ? "run" : "skip"}: ${reason}`);
+// src/fanout.ts
+function parseFanout(text) {
+  const doc = (0, import_yaml2.parse)(text);
+  if (!doc || typeof doc !== "object" || Array.isArray(doc)) throw new Error("`lanes` must be a YAML map");
+  return Object.entries(doc).map(([name, spec]) => {
+    if (!/^[A-Za-z0-9_.-]+$/.test(name)) throw new Error(`bad lane name "${name}"`);
+    if (!spec?.paths?.length || !spec.workflow) throw new Error(`lane "${name}" needs paths and workflow`);
+    return { name, paths: spec.paths, workflow: spec.workflow, checks: spec.checks ?? [] };
+  });
+}
+var runTitle = (lane, hash, headSha) => `supersonic ${lane} ${hash} ${headSha}`;
+async function activeLaneRuns(branch, token) {
+  const runs = [];
+  for (const status of ["queued", "in_progress", "waiting", "pending"]) {
+    const response = await githubApi(`/actions/runs?branch=${encodeURIComponent(branch)}&event=workflow_dispatch&status=${status}&per_page=100`, token);
+    if (!response.ok) continue;
+    const body2 = await response.json();
+    runs.push(...body2.workflow_runs);
+  }
+  return runs;
+}
+async function postChecks(names, headSha, conclusion, summary2, token) {
+  for (const name of names) {
+    const response = await githubApi("/check-runs", token, {
+      method: "POST",
+      body: JSON.stringify({ name, head_sha: headSha, status: "completed", conclusion, output: { title: summary2, summary: summary2 } })
+    });
+    if (!response.ok) warning(`Could not post check "${name}": ${response.status} ${await response.text()}`);
+  }
 }
 async function run() {
-  const lane = getInput("lane", { required: true });
-  const pathsInput = getInput("paths", { required: true });
+  const lanes = parseFanout(getInput("lanes", { required: true }));
   const prefix2 = getInput("key-prefix") || "supersonic-ci";
-  const cwd = getInput("working-directory") || process.env.GITHUB_WORKSPACE || process.cwd();
-  if (!isFeatureAvailable()) return decide(true, "", "the Actions cache is not available");
-  const paths = pathsInput.trim().startsWith("[") ? parseLanes(`${lane}: ${pathsInput}`)[0].paths : pathsInput.split(/\s+/).filter(Boolean);
-  let hash;
-  try {
-    hash = laneHash({ name: lane, paths, salt: getInput("salt") }, cwd);
-  } catch (error2) {
-    return decide(true, "", `could not hash the lane: ${error2}`);
-  }
-  await saveNote(headKey(prefix2, lane, Date.now(), hash));
-  const result = await waitForResult(prefix2, lane, hash, getInput("github-token"), waitInputs());
-  decide(result.run, hash, result.reason);
+  const token = getInput("github-token");
+  const sha = getInput("sha", { required: true });
+  const headSha = getInput("head-sha", { required: true });
+  const branch = getInput("ref", { required: true });
+  const extraInputs = JSON.parse(getInput("inputs") || "{}");
+  const touched = JSON.parse(getInput("touched") || "{}");
+  const cwd = process.env.GITHUB_WORKSPACE || process.cwd();
+  const cacheAvailable = isFeatureAvailable();
+  const active = await activeLaneRuns(branch, token);
+  await Promise.all(
+    lanes.map(async (lane) => {
+      let hash = "";
+      try {
+        hash = laneHash({ name: lane.name, paths: lane.paths, salt: getInput("salt") }, cwd);
+      } catch (error2) {
+        warning(`Could not hash lane "${lane.name}": ${error2}`);
+      }
+      if (hash && cacheAvailable) await saveNote(headKey(prefix2, lane.name, Date.now(), hash));
+      for (const r of active) {
+        const [tag, name, runHash] = r.display_title.split(" ");
+        if (tag === "supersonic" && name === lane.name && runHash !== hash) {
+          await githubApi(`/actions/runs/${r.id}/cancel`, token, { method: "POST" });
+          info(`${lane.name}: cancelled stale run ${r.id} (${runHash})`);
+        }
+      }
+      const isTouched = !(lane.name in touched) || touched[lane.name] === true || touched[lane.name] === "true";
+      if (!isTouched) {
+        await postChecks(lane.checks, headSha, "skipped", "This PR does not touch this lane.", token);
+        info(`${lane.name}: untouched, posted skipped checks`);
+        return;
+      }
+      if (hash && cacheAvailable && await hasPassed(prefix2, lane.name, hash)) {
+        await postChecks(lane.checks, headSha, "success", `Already passed on inputs ${hash}.`, token);
+        info(`${lane.name}: already passed on ${hash}, posted green checks`);
+        return;
+      }
+      const response = await githubApi(`/actions/workflows/${lane.workflow}/dispatches`, token, {
+        method: "POST",
+        body: JSON.stringify({ ref: branch, inputs: { ...extraInputs, hash, sha, head_sha: headSha } })
+      });
+      if (!response.ok) throw new Error(`dispatching ${lane.workflow} failed: ${response.status} ${await response.text()}`);
+      info(`${lane.name}: dispatched ${lane.workflow} on ${hash || "no hash"}`);
+    })
+  );
 }
-run().catch((error2) => {
-  warning(`supersonic-ci gate failed, so the job will run: ${error2}`);
-  setOutput("run", "true");
-  setOutput("hash", "");
-});
+run().catch((error2) => setFailed(`supersonic-ci fanout failed: ${error2}`));
+export {
+  runTitle
+};

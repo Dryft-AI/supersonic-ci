@@ -1,0 +1,37 @@
+name: supersonic-ci await
+description: For a lane the plan said to wait on. Run it in a job that queues behind the older job through a concurrency group, so the waiting costs no runner. Reports whether the older job passed.
+author: Dryft
+branding:
+  icon: pause
+  color: blue
+inputs:
+  lane:
+    description: Lane name.
+    required: true
+  hash:
+    description: The lane's hash from plan.
+    required: true
+  key-prefix:
+    description: Must match plan.
+    required: false
+    default: supersonic-ci
+  github-token:
+    description: Token used to ask whether an older job is still running.
+    required: false
+    default: ${{ github.token }}
+  poll-seconds:
+    required: false
+    default: "10"
+  settle-seconds:
+    description: How long to keep looking for the older job's pass after it ended.
+    required: false
+    default: "30"
+  max-wait-minutes:
+    required: false
+    default: "45"
+outputs:
+  run:
+    description: "'true' if the lane's job should run."
+runs:
+  using: node24
+  main: dist/index.mjs

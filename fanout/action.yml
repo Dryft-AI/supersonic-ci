@@ -1,0 +1,39 @@
+name: supersonic-ci fanout
+description: For CI split into one workflow per lane. Cancels lane runs a newer push made stale, posts green checks for lanes that already passed, and dispatches only the lanes that need to run.
+author: Dryft
+branding:
+  icon: share-2
+  color: blue
+inputs:
+  lanes:
+    description: YAML map of lane name to {paths, workflow, checks}. checks are the required check names the lane's jobs report.
+    required: true
+  sha:
+    description: Commit the lanes should test, usually the PR merge commit.
+    required: true
+  head-sha:
+    description: Commit the checks are reported on, usually the PR head.
+    required: true
+  ref:
+    description: Branch to dispatch the lane workflows on.
+    required: true
+  touched:
+    description: JSON object of lane name to whether the PR touches it. Lanes marked false get skipped checks.
+    required: false
+    default: "{}"
+  inputs:
+    description: JSON object of extra workflow_dispatch inputs passed to every lane.
+    required: false
+    default: "{}"
+  salt:
+    required: false
+    default: ""
+  key-prefix:
+    required: false
+    default: supersonic-ci
+  github-token:
+    required: false
+    default: ${{ github.token }}
+runs:
+  using: node24
+  main: dist/index.mjs

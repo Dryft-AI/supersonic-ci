@@ -2,7 +2,7 @@ import * as core from "@actions/core";
 import { passKey } from "./lanes.js";
 import { exists, newestWithPrefix, parseStartedKey, startedPrefix } from "./notes.js";
 
-export type JobState = "running" | "done" | "unknown";
+export type JobState = "running" | "failed" | "done" | "unknown";
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -23,9 +23,12 @@ export async function jobState(runId: string, runner: string, token: string): Pr
   for (let page = 1; page <= 5; page++) {
     const response = await githubApi(`/actions/runs/${runId}/jobs?filter=latest&per_page=100&page=${page}`, token);
     if (!response.ok) return "unknown";
-    const body = (await response.json()) as { jobs: { runner_name: string | null; status: string }[] };
+    const body = (await response.json()) as { jobs: { runner_name: string | null; status: string; conclusion: string | null }[] };
     const job = body.jobs.find((j) => (j.runner_name ?? "").replace(/[^A-Za-z0-9_.-]/g, "_") === runner);
-    if (job) return job.status === "completed" ? "done" : "running";
+    if (job) {
+      if (job.status !== "completed") return "running";
+      return job.conclusion === "failure" ? "failed" : "done";
+    }
     if (body.jobs.length < 100) break;
   }
   return "done";
@@ -51,16 +54,24 @@ export async function waitForResult(
   token: string,
   wait: Wait,
   settleEvenIfIdle = false,
-): Promise<{ run: boolean; reason: string }> {
+): Promise<{ run: boolean; failed?: boolean; reason: string }> {
   let waited = settleEvenIfIdle;
   let quietSince: number | undefined;
+  let started: ReturnType<typeof parseStartedKey>;
   while (Date.now() < wait.deadline) {
     if (await hasPassed(prefix, lane, hash)) {
       return { run: false, reason: waited ? `the earlier job passed on ${hash} while this one waited` : `already passed on ${hash}` };
     }
-    const runId = await inFlight(prefix, lane, hash, token);
-    if (runId) {
-      if (!waited) core.info(`Run ${runId} is already testing ${hash}, waiting for its result.`);
+    if (!started) {
+      const key = await newestWithPrefix(startedPrefix(prefix, lane, hash));
+      started = key ? parseStartedKey(key, prefix, lane, hash) : undefined;
+    }
+    const state = started ? await jobState(started.runId, started.runner, token) : "done";
+    if (state === "failed" && waited && started) {
+      return { run: false, failed: true, reason: `the earlier job in run ${started.runId} failed on ${hash}` };
+    }
+    if (state === "running") {
+      if (!waited) core.info(`Run ${started?.runId} is already testing ${hash}, waiting for its result.`);
       waited = true;
       quietSince = undefined;
     } else {

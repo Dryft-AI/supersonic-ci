@@ -29,6 +29,7 @@ async function run(): Promise<void> {
   await saveNote(headKey(prefix, lane, Date.now(), hash));
   const result = await waitForResult(prefix, lane, hash, core.getInput("github-token"), waitInputs());
   decide(result.run, hash, result.reason);
+  if (result.failed) core.setFailed(result.reason);
 }
 
 run().catch((error) => {

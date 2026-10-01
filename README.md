@@ -70,7 +70,22 @@ A lane that matches no tracked files is an error. It logs a warning and the job 
 
 Only when `record` saved an entry for exactly this hash, and `record` only saves after every step in its job succeeded (`post-if: success()`). A failed or cancelled job saves nothing.
 
-Everything that goes wrong fails open. A hash that can't be computed, a cache lookup that errors, or a cache service that isn't there all mean "run the job".
+A hash that can't be computed, a cache lookup that errors, or a cache service that isn't there all mean "run the job".
+
+## Waiting for an identical job
+
+`gate` waits when an earlier job is already testing the same inputs. `await` handles lanes that `plan` marked for waiting, including when the earlier job finishes before `await` starts.
+
+| Earlier job's result | Waiting job's behavior |
+|---|---|
+| Recorded success | Skip the duplicate work |
+| GitHub conclusion `failure` | Fail the action and set `run=false` |
+| Cancelled, timed out, missing, or unreadable | Run the work after the settling period |
+| Still running after the wait limit | Run the work |
+
+GitHub's `failure` conclusion includes test failures and infrastructure errors reported as failures. The waiting action does not distinguish them. Required checks must include the gate or await job so an inherited failure blocks merging.
+
+Failures are not cached. A fresh `gate` invocation that finds an already-failed job runs the work again, so rerunning CI can retry a flaky failure.
 
 ## Where records live
 
@@ -78,7 +93,7 @@ In the GitHub Actions cache, under `<key-prefix>-<lane>-<hash>`. GitHub's normal
 
 ## What it doesn't do
 
-It doesn't wait for a job that's still running on the same inputs in an earlier run. If you push while CI is running, a job whose inputs you didn't change reruns unless it had already finished and recorded. Keep your usual `concurrency` cancel settings. A cancelled job never records, so cancelling can't produce a false skip.
+`check` only looks for recorded successes; it does not wait. Use `gate` or `plan` with `await` to wait for identical work already running.
 
 It doesn't know what a job reads. If your backend tests read a file outside the backend lane's paths, a change to that file won't rerun them. The lane paths are the whole contract.
 

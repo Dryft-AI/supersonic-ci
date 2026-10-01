@@ -1,5 +1,5 @@
 name: supersonic-ci await
-description: For a lane the plan said to wait on. Run it in a job that queues behind the older job through a concurrency group, so the waiting costs no runner. Reports whether the older job passed.
+description: For a lane the plan said to wait on. Run it in a job that queues behind the older job through a concurrency group, so the waiting costs no runner. Inherits the older job's pass or failure.
 author: Dryft
 branding:
   icon: pause

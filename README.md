@@ -91,6 +91,29 @@ Failures are not cached. A fresh `gate` invocation that finds an already-failed 
 
 In the GitHub Actions cache, under `<key-prefix>-<lane>-<hash>`. GitHub's normal cache scoping applies. A pull request sees records from its own branch and from the base branch, but not from other pull requests. Entries unused for 7 days are evicted, and the repository's cache size limit applies. Each record is a single small file.
 
+### Sharing passes across branches
+
+Cache scoping means a push to main never sees a pass from the pull request that produced the same files, so main reruns work the pull request already did. Set `shared: true` on both `check` and `record` to lift that:
+
+```yaml
+      - id: check
+        uses: Dryft-AI/supersonic-ci/check@v2
+        with:
+          shared: true
+          lanes: |
+            backend: [backend, .github/workflows/ci.yml]
+
+      - uses: Dryft-AI/supersonic-ci/record@v2
+        with:
+          lane: backend
+          hash: ${{ fromJSON(needs.plan.outputs.hashes).backend }}
+          shared: true
+```
+
+`record` then also uploads a one-line artifact named `<key-prefix>-<lane>-<hash>`, kept for 7 days. When the cache has no record, `check` asks the repository's artifacts API for an unexpired artifact with exactly that name. The lookup needs `actions: read`. Artifacts are not routed through runner caches such as Blacksmith's, so this also works where cache records stay on the runner provider's side.
+
+Any workflow in the repository can upload an artifact with any name, so a shared pass is only as trustworthy as the workflows that can run in the repository. Leave it off where pull requests from forks run CI.
+
 ## What it doesn't do
 
 `check` only looks for recorded successes; it does not wait. Use `gate` or `plan` with `await` to wait for identical work already running.

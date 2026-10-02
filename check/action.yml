@@ -20,6 +20,14 @@ inputs:
     description: Git checkout to hash. Defaults to GITHUB_WORKSPACE.
     required: false
     default: ""
+  shared:
+    description: Also accept a pass that record saved with shared set, from any branch in the repository. Needs actions read permission.
+    required: false
+    default: "false"
+  github-token:
+    description: Token for the shared lookup.
+    required: false
+    default: ${{ github.token }}
 outputs:
   hashes:
     description: JSON object of lane name to inputs hash. Also set as <lane>-hash.

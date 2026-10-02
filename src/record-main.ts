@@ -18,6 +18,7 @@ async function run(): Promise<void> {
   }
   if (save) {
     core.saveState("key", passKey(prefix, lane, hash));
+    core.saveState("shared", core.getInput("shared"));
     core.info(`If this job succeeds, ${passKey(prefix, lane, hash)} will be recorded as passed.`);
   }
 

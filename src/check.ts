@@ -1,13 +1,22 @@
 import * as cache from "@actions/cache";
 import * as core from "@actions/core";
 import { laneHash, parseLanes, PASS_PATH, passKey } from "./lanes.js";
+import { sharedPassExists } from "./shared.js";
 
-async function hasPassed(key: string): Promise<boolean> {
+async function inCache(key: string): Promise<boolean> {
   try {
-    const hit = await cache.restoreCache([PASS_PATH], key, [], { lookupOnly: true });
-    return hit === key;
+    return (await cache.restoreCache([PASS_PATH], key, [], { lookupOnly: true })) === key;
   } catch (error) {
-    core.warning(`Could not look up ${key}, so the job will run: ${error}`);
+    core.warning(`Could not look up ${key} in the cache: ${error}`);
+    return false;
+  }
+}
+
+async function inSharedStore(key: string, token: string): Promise<boolean> {
+  try {
+    return await sharedPassExists(key, token);
+  } catch (error) {
+    core.warning(`Could not look up ${key} in the shared store: ${error}`);
     return false;
   }
 }
@@ -17,8 +26,10 @@ async function run(): Promise<void> {
   const prefix = core.getInput("key-prefix") || "supersonic-ci";
   const salt = core.getInput("salt");
   const cwd = core.getInput("working-directory") || process.env.GITHUB_WORKSPACE || process.cwd();
+  const shared = core.getInput("shared") === "true";
+  const token = core.getInput("github-token");
   const cacheAvailable = cache.isFeatureAvailable();
-  if (!cacheAvailable) {
+  if (!cacheAvailable && !shared) {
     core.warning("The Actions cache is not available here, so every job will run.");
   }
 
@@ -32,13 +43,22 @@ async function run(): Promise<void> {
     } catch (error) {
       core.warning(`Could not hash lane "${lane.name}", so it will run: ${error}`);
     }
-    const ok = cacheAvailable && hash !== "" && (await hasPassed(passKey(prefix, lane.name, hash)));
+    const key = passKey(prefix, lane.name, hash);
+    const source =
+      hash === ""
+        ? undefined
+        : cacheAvailable && (await inCache(key))
+          ? "cache"
+          : shared && (await inSharedStore(key, token))
+            ? "shared store"
+            : undefined;
+    const ok = source !== undefined;
     hashes[lane.name] = hash;
     passed[lane.name] = ok;
     core.setOutput(`${lane.name}-hash`, hash);
     core.setOutput(`${lane.name}-passed`, String(ok));
-    core.info(`${lane.name}: ${ok ? "already passed, skip" : "not passed yet, run"} (${hash || "no hash"})`);
-    rows.push([lane.name, hash || "none", ok ? "skip, already passed" : "run"]);
+    core.info(`${lane.name}: ${ok ? `already passed (${source}), skip` : "not passed yet, run"} (${hash || "no hash"})`);
+    rows.push([lane.name, hash || "none", ok ? `skip, already passed (${source})` : "run"]);
   }
   core.setOutput("hashes", JSON.stringify(hashes));
   core.setOutput("passed", JSON.stringify(passed));

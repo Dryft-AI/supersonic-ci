@@ -38190,9 +38190,9 @@ function createLoggerContext(options) {
     }
     logLevel = level;
     const enabledNamespaces2 = [];
-    for (const logger8 of registeredLoggers) {
-      if (shouldEnable(logger8)) {
-        enabledNamespaces2.push(logger8.namespace);
+    for (const logger7 of registeredLoggers) {
+      if (shouldEnable(logger7)) {
+        enabledNamespaces2.push(logger7.namespace);
       }
     }
     debug_default.enable(enabledNamespaces2.join(","));
@@ -38204,20 +38204,20 @@ function createLoggerContext(options) {
       console.error(`${options.logLevelEnvVarName} set to unknown log level '${logLevelFromEnv}'; logging is not enabled. Acceptable values: ${TYPESPEC_RUNTIME_LOG_LEVELS.join(", ")}.`);
     }
   }
-  function shouldEnable(logger8) {
-    return Boolean(logLevel && levelMap[logger8.level] <= levelMap[logLevel]);
+  function shouldEnable(logger7) {
+    return Boolean(logLevel && levelMap[logger7.level] <= levelMap[logLevel]);
   }
   function createLogger(parent, level) {
-    const logger8 = Object.assign(parent.extend(level), {
+    const logger7 = Object.assign(parent.extend(level), {
       level
     });
-    patchLogMethod(parent, logger8);
-    if (shouldEnable(logger8)) {
+    patchLogMethod(parent, logger7);
+    if (shouldEnable(logger7)) {
       const enabledNamespaces2 = debug_default.disable();
-      debug_default.enable(enabledNamespaces2 + "," + logger8.namespace);
+      debug_default.enable(enabledNamespaces2 + "," + logger7.namespace);
     }
-    registeredLoggers.add(logger8);
-    return logger8;
+    registeredLoggers.add(logger7);
+    return logger7;
   }
   function contextGetLogLevel() {
     return logLevel;
@@ -39108,7 +39108,7 @@ function createDefaultHttpClient() {
 // node_modules/.pnpm/@typespec+ts-http-runtime@0.3.9/node_modules/@typespec/ts-http-runtime/dist/esm/policies/logPolicy.js
 var logPolicyName = "logPolicy";
 function logPolicy(options = {}) {
-  const logger8 = options.logger ?? logger.info;
+  const logger7 = options.logger ?? logger.info;
   const sanitizer = new Sanitizer({
     additionalAllowedHeaderNames: options.additionalAllowedHeaderNames,
     additionalAllowedQueryParameters: options.additionalAllowedQueryParameters
@@ -39116,13 +39116,13 @@ function logPolicy(options = {}) {
   return {
     name: logPolicyName,
     async sendRequest(request, next) {
-      if (!logger8.enabled) {
+      if (!logger7.enabled) {
         return next(request);
       }
-      logger8(`Request: ${sanitizer.sanitize(request)}`);
+      logger7(`Request: ${sanitizer.sanitize(request)}`);
       const response = await next(request);
-      logger8(`Response status code: ${response.status}`);
-      logger8(`Headers: ${sanitizer.sanitize({ headers: response.headers })}`);
+      logger7(`Response status code: ${response.status}`);
+      logger7(`Headers: ${sanitizer.sanitize({ headers: response.headers })}`);
       return response;
     }
   };
@@ -39286,7 +39286,7 @@ function isSystemError(err) {
 var retryPolicyLogger = createClientLogger("ts-http-runtime retryPolicy");
 var retryPolicyName = "retryPolicy";
 function retryPolicy(strategies, options = { maxRetries: DEFAULT_RETRY_POLICY_COUNT }) {
-  const logger8 = options.logger || retryPolicyLogger;
+  const logger7 = options.logger || retryPolicyLogger;
   return {
     name: retryPolicyName,
     async sendRequest(request, next) {
@@ -39297,11 +39297,11 @@ function retryPolicy(strategies, options = { maxRetries: DEFAULT_RETRY_POLICY_CO
         retryCount += 1;
         responseError = void 0;
         try {
-          logger8.info(`Retry ${retryCount}: Attempting to send request`, request.requestId);
+          logger7.info(`Retry ${retryCount}: Attempting to send request`, request.requestId);
           response = await next(request);
-          logger8.info(`Retry ${retryCount}: Received a response from request`, request.requestId);
+          logger7.info(`Retry ${retryCount}: Received a response from request`, request.requestId);
         } catch (e) {
-          logger8.error(`Retry ${retryCount}: Received an error from request`, request.requestId);
+          logger7.error(`Retry ${retryCount}: Received an error from request`, request.requestId);
           if (!isRestError(e)) {
             throw e;
           }
@@ -39309,12 +39309,12 @@ function retryPolicy(strategies, options = { maxRetries: DEFAULT_RETRY_POLICY_CO
           response = e.response;
         }
         if (request.abortSignal?.aborted) {
-          logger8.error(`Retry ${retryCount}: Request aborted.`);
+          logger7.error(`Retry ${retryCount}: Request aborted.`);
           const abortError = new AbortError();
           throw abortError;
         }
         if (retryCount >= (options.maxRetries ?? DEFAULT_RETRY_POLICY_COUNT)) {
-          logger8.info(`Retry ${retryCount}: Maximum retries reached. Returning the last received response, or throwing the last received error.`);
+          logger7.info(`Retry ${retryCount}: Maximum retries reached. Returning the last received response, or throwing the last received error.`);
           if (responseError) {
             throw responseError;
           } else if (response) {
@@ -39323,9 +39323,9 @@ function retryPolicy(strategies, options = { maxRetries: DEFAULT_RETRY_POLICY_CO
             throw new Error("Maximum retries reached with no response or error to throw");
           }
         }
-        logger8.info(`Retry ${retryCount}: Processing ${strategies.length} retry strategies.`);
+        logger7.info(`Retry ${retryCount}: Processing ${strategies.length} retry strategies.`);
         strategiesLoop: for (const strategy of strategies) {
-          const strategyLogger = strategy.logger || logger8;
+          const strategyLogger = strategy.logger || logger7;
           strategyLogger.info(`Retry ${retryCount}: Processing retry strategy ${strategy.name}.`);
           const modifiers = strategy.retry({
             retryCount,
@@ -39353,11 +39353,11 @@ function retryPolicy(strategies, options = { maxRetries: DEFAULT_RETRY_POLICY_CO
           }
         }
         if (responseError) {
-          logger8.info(`None of the retry strategies could work with the received error. Throwing it.`);
+          logger7.info(`None of the retry strategies could work with the received error. Throwing it.`);
           throw responseError;
         }
         if (response) {
-          logger8.info(`None of the retry strategies could work with the received response. Returning it.`);
+          logger7.info(`None of the retry strategies could work with the received response. Returning it.`);
           return response;
         }
       }
@@ -39838,7 +39838,7 @@ function multipartPolicy() {
   };
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/pipeline.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/pipeline.js
 function createEmptyPipeline2() {
   return createEmptyPipeline();
 }
@@ -39853,10 +39853,10 @@ function createClientLogger2(namespace) {
   return context2.createClientLogger(namespace);
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/log.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/log.js
 var logger2 = createClientLogger2("core-rest-pipeline");
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/logPolicy.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/logPolicy.js
 function logPolicy2(options = {}) {
   return logPolicy({
     logger: logger2.info,
@@ -39864,13 +39864,13 @@ function logPolicy2(options = {}) {
   });
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/redirectPolicy.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/redirectPolicy.js
 var redirectPolicyName2 = redirectPolicyName;
 function redirectPolicy2(options = {}) {
   return redirectPolicy(options);
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/util/userAgentPlatform.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/util/userAgentPlatform.js
 import os6 from "node:os";
 import process4 from "node:process";
 function getHeaderName2() {
@@ -39879,21 +39879,20 @@ function getHeaderName2() {
 async function setPlatformSpecificData2(map) {
   if (process4 && process4.versions) {
     const osInfo = `${os6.type()} ${os6.release()}; ${os6.arch()}`;
-    const versions = process4.versions;
-    if (versions.bun) {
-      map.set("Bun", `${versions.bun} (${osInfo})`);
-    } else if (versions.deno) {
-      map.set("Deno", `${versions.deno} (${osInfo})`);
-    } else if (versions.node) {
-      map.set("Node", `${versions.node} (${osInfo})`);
+    if (process4.versions.bun) {
+      map.set("Bun", `${process4.versions.bun} (${osInfo})`);
+    } else if (process4.versions.deno) {
+      map.set("Deno", `${process4.versions.deno} (${osInfo})`);
+    } else if (process4.versions.node) {
+      map.set("Node", `${process4.versions.node} (${osInfo})`);
     }
   }
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/constants.js
-var SDK_VERSION2 = "1.22.3";
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/constants.js
+var SDK_VERSION2 = "1.25.0";
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/util/userAgent.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/util/userAgent.js
 function getUserAgentString(telemetryInfo) {
   const parts = [];
   for (const [key, value] of telemetryInfo) {
@@ -39914,7 +39913,7 @@ async function getUserAgentValue2(prefix2) {
   return userAgentValue;
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/userAgentPolicy.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/userAgentPolicy.js
 var UserAgentHeaderName2 = getUserAgentHeaderName2();
 var userAgentPolicyName2 = "userAgentPolicy";
 function userAgentPolicy2(options = {}) {
@@ -39928,6 +39927,54 @@ function userAgentPolicy2(options = {}) {
       return next(request);
     }
   };
+}
+
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/util/file.js
+var rawContent = /* @__PURE__ */ Symbol("rawContent");
+function hasRawContent(x) {
+  return typeof x[rawContent] === "function";
+}
+function getRawContent(blob) {
+  if (hasRawContent(blob)) {
+    return blob[rawContent]();
+  } else {
+    return blob;
+  }
+}
+
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/multipartPolicy.js
+var multipartPolicyName2 = multipartPolicyName;
+function multipartPolicy2() {
+  const tspPolicy = multipartPolicy();
+  return {
+    name: multipartPolicyName2,
+    sendRequest: async (request, next) => {
+      if (request.multipartBody) {
+        for (const part of request.multipartBody.parts) {
+          if (hasRawContent(part.body)) {
+            part.body = getRawContent(part.body);
+          }
+        }
+      }
+      return tspPolicy.sendRequest(request, next);
+    }
+  };
+}
+
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/decompressResponsePolicy.js
+var decompressResponsePolicyName2 = decompressResponsePolicyName;
+function decompressResponsePolicy2() {
+  return decompressResponsePolicy();
+}
+
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/defaultRetryPolicy.js
+function defaultRetryPolicy2(options = {}) {
+  return defaultRetryPolicy(options);
+}
+
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/formDataPolicy.js
+function formDataPolicy2() {
+  return formDataPolicy();
 }
 
 // node_modules/.pnpm/@azure+abort-controller@2.2.0/node_modules/@azure/abort-controller/dist/esm/AbortError.js
@@ -40019,55 +40066,7 @@ function stringToUint8Array2(value, format) {
   return stringToUint8Array(value, format);
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/util/file.js
-var rawContent = /* @__PURE__ */ Symbol("rawContent");
-function hasRawContent(x) {
-  return typeof x[rawContent] === "function";
-}
-function getRawContent(blob) {
-  if (hasRawContent(blob)) {
-    return blob[rawContent]();
-  } else {
-    return blob;
-  }
-}
-
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/multipartPolicy.js
-var multipartPolicyName2 = multipartPolicyName;
-function multipartPolicy2() {
-  const tspPolicy = multipartPolicy();
-  return {
-    name: multipartPolicyName2,
-    sendRequest: async (request, next) => {
-      if (request.multipartBody) {
-        for (const part of request.multipartBody.parts) {
-          if (hasRawContent(part.body)) {
-            part.body = getRawContent(part.body);
-          }
-        }
-      }
-      return tspPolicy.sendRequest(request, next);
-    }
-  };
-}
-
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/decompressResponsePolicy.js
-var decompressResponsePolicyName2 = decompressResponsePolicyName;
-function decompressResponsePolicy2() {
-  return decompressResponsePolicy();
-}
-
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/defaultRetryPolicy.js
-function defaultRetryPolicy2(options = {}) {
-  return defaultRetryPolicy(options);
-}
-
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/formDataPolicy.js
-function formDataPolicy2() {
-  return formDataPolicy();
-}
-
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/proxyPolicy.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/proxyPolicy.js
 function getDefaultProxySettings2(proxyUrl) {
   return getDefaultProxySettings(proxyUrl);
 }
@@ -40075,7 +40074,7 @@ function proxyPolicy2(proxySettings, options) {
   return proxyPolicy(proxySettings, options);
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/setClientRequestIdPolicy.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/setClientRequestIdPolicy.js
 var setClientRequestIdPolicyName = "setClientRequestIdPolicy";
 function setClientRequestIdPolicy(requestIdHeaderName = "x-ms-client-request-id") {
   return {
@@ -40089,12 +40088,12 @@ function setClientRequestIdPolicy(requestIdHeaderName = "x-ms-client-request-id"
   };
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/agentPolicy.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/agentPolicy.js
 function agentPolicy2(agent) {
   return agentPolicy(agent);
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/tlsPolicy.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/tlsPolicy.js
 function tlsPolicy2(tlsSettings) {
   return tlsPolicy(tlsSettings);
 }
@@ -40235,13 +40234,13 @@ function createTracingClient(options) {
   };
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/restError.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/restError.js
 var RestError2 = RestError;
 function isRestError2(e) {
   return isRestError(e);
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/tracingPolicy.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/tracingPolicy.js
 var tracingPolicyName = "tracingPolicy";
 function tracingPolicy(options = {}) {
   const userAgentPromise = getUserAgentValue2(options.userAgentPrefix);
@@ -40344,13 +40343,15 @@ function tryProcessResponse(span, response) {
   }
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/util/wrapAbortSignal.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/util/wrapAbortSignal.js
 function wrapAbortSignalLike(abortSignalLike) {
   if (abortSignalLike instanceof AbortSignal) {
     return { abortSignal: abortSignalLike };
   }
   if (abortSignalLike.aborted) {
-    return { abortSignal: AbortSignal.abort(abortSignalLike.reason) };
+    return {
+      abortSignal: AbortSignal.abort("reason" in abortSignalLike ? abortSignalLike.reason : void 0)
+    };
   }
   const controller = new AbortController();
   let needsCleanup = true;
@@ -40361,14 +40362,14 @@ function wrapAbortSignalLike(abortSignalLike) {
     }
   }
   function listener() {
-    controller.abort(abortSignalLike.reason);
+    controller.abort("reason" in abortSignalLike ? abortSignalLike.reason : void 0);
     cleanup();
   }
   abortSignalLike.addEventListener("abort", listener);
   return { abortSignal: controller.signal, cleanup };
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/wrapAbortSignalLikePolicy.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/wrapAbortSignalLikePolicy.js
 var wrapAbortSignalLikePolicyName = "wrapAbortSignalLikePolicy";
 function wrapAbortSignalLikePolicy() {
   return {
@@ -40388,7 +40389,7 @@ function wrapAbortSignalLikePolicy() {
   };
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/createPipelineFromOptions.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/createPipelineFromOptions.js
 function createPipelineFromOptions2(options) {
   const pipeline2 = createEmptyPipeline2();
   if (isNodeLike2) {
@@ -40417,7 +40418,7 @@ function createPipelineFromOptions2(options) {
   return pipeline2;
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/defaultHttpClient.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/defaultHttpClient.js
 function createDefaultHttpClient2() {
   const client = createDefaultHttpClient();
   return {
@@ -40433,20 +40434,20 @@ function createDefaultHttpClient2() {
   };
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/httpHeaders.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/httpHeaders.js
 function createHttpHeaders2(rawHeaders) {
   return createHttpHeaders(rawHeaders);
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/pipelineRequest.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/pipelineRequest.js
 function createPipelineRequest2(options) {
   return createPipelineRequest(options);
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/retryPolicy.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/retryPolicy.js
 var retryPolicyLogger2 = createClientLogger2("core-rest-pipeline retryPolicy");
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/util/tokenCycler.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/util/tokenCycler.js
 var DEFAULT_CYCLER_OPTIONS = {
   forcedRefreshWindowInMs: 1e3,
   // Force waiting for a refresh 1s before the token expires
@@ -40498,13 +40499,16 @@ function createTokenCycler(credential, tokenCyclerOptions) {
      * window and not already refreshing)
      */
     get shouldRefresh() {
+      if (token === null) {
+        return true;
+      }
       if (cycler.isRefreshing) {
         return false;
       }
-      if (token?.refreshAfterTimestamp && token.refreshAfterTimestamp < Date.now()) {
+      if (token.refreshAfterTimestamp && token.refreshAfterTimestamp < Date.now()) {
         return true;
       }
-      return (token?.expiresOnTimestamp ?? 0) - options.refreshWindowInMs < Date.now();
+      return token.expiresOnTimestamp - options.refreshWindowInMs < Date.now();
     },
     /**
      * Produces true if the cycler MUST refresh (null or nearly-expired
@@ -40553,7 +40557,7 @@ function createTokenCycler(credential, tokenCyclerOptions) {
   };
 }
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/bearerTokenAuthenticationPolicy.js
+// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/bearerTokenAuthenticationPolicy.js
 var bearerTokenAuthenticationPolicyName = "bearerTokenAuthenticationPolicy";
 async function trySendRequest(request, next) {
   try {
@@ -40595,7 +40599,7 @@ async function authorizeRequestOnCaeChallenge(onChallengeOptions, caeClaims) {
 }
 function bearerTokenAuthenticationPolicy(options) {
   const { credential, scopes, challengeCallbacks } = options;
-  const logger8 = options.logger || logger2;
+  const logger7 = options.logger || logger2;
   const callbacks = {
     authorizeRequest: challengeCallbacks?.authorizeRequest?.bind(challengeCallbacks) ?? defaultAuthorizeRequest,
     authorizeRequestOnChallenge: challengeCallbacks?.authorizeRequestOnChallenge?.bind(challengeCallbacks)
@@ -40627,7 +40631,7 @@ function bearerTokenAuthenticationPolicy(options) {
         scopes: Array.isArray(scopes) ? scopes : [scopes],
         request,
         getAccessToken,
-        logger: logger8
+        logger: logger7
       });
       let response;
       let error2;
@@ -40640,7 +40644,7 @@ function bearerTokenAuthenticationPolicy(options) {
           try {
             parsedClaim = atob(claims);
           } catch (e) {
-            logger8.warning(`The WWW-Authenticate header contains "claims" that cannot be parsed. Unable to perform the Continuous Access Evaluation authentication flow. Unparsable claims: ${claims}`);
+            logger7.warning(`The WWW-Authenticate header contains "claims" that cannot be parsed. Unable to perform the Continuous Access Evaluation authentication flow. Unparsable claims: ${claims}`);
             return response;
           }
           shouldSendRequest = await authorizeRequestOnCaeChallenge({
@@ -40648,7 +40652,7 @@ function bearerTokenAuthenticationPolicy(options) {
             response,
             request,
             getAccessToken,
-            logger: logger8
+            logger: logger7
           }, parsedClaim);
           if (shouldSendRequest) {
             [response, error2] = await trySendRequest(request, next);
@@ -40659,19 +40663,19 @@ function bearerTokenAuthenticationPolicy(options) {
             request,
             response,
             getAccessToken,
-            logger: logger8
+            logger: logger7
           });
           if (shouldSendRequest) {
             [response, error2] = await trySendRequest(request, next);
           }
           if (isChallengeResponse(response)) {
-            claims = getCaeChallengeClaims(response.headers.get("WWW-Authenticate"));
+            claims = getCaeChallengeClaims(response.headers.get("WWW-Authenticate") ?? "");
             if (claims) {
               let parsedClaim;
               try {
                 parsedClaim = atob(claims);
               } catch (e) {
-                logger8.warning(`The WWW-Authenticate header contains "claims" that cannot be parsed. Unable to perform the Continuous Access Evaluation authentication flow. Unparsable claims: ${claims}`);
+                logger7.warning(`The WWW-Authenticate header contains "claims" that cannot be parsed. Unable to perform the Continuous Access Evaluation authentication flow. Unparsable claims: ${claims}`);
                 return response;
               }
               shouldSendRequest = await authorizeRequestOnCaeChallenge({
@@ -40679,7 +40683,7 @@ function bearerTokenAuthenticationPolicy(options) {
                 response,
                 request,
                 getAccessToken,
-                logger: logger8
+                logger: logger7
               }, parsedClaim);
               if (shouldSendRequest) {
                 [response, error2] = await trySendRequest(request, next);
@@ -40727,7 +40731,7 @@ function isTokenCredential(credential) {
   return castCredential && typeof castCredential.getToken === "function" && (castCredential.signRequest === void 0 || castCredential.getToken.length > 0);
 }
 
-// node_modules/.pnpm/@azure+core-http-compat@2.5.0_@azure+core-client@1.11.1_@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-http-compat/dist/esm/policies/disableKeepAlivePolicy.js
+// node_modules/.pnpm/@azure+core-http-compat@2.5.0_@azure+core-client@1.11.1_@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-http-compat/dist/esm/policies/disableKeepAlivePolicy.js
 var disableKeepAlivePolicyName = "DisableKeepAlivePolicy";
 function createDisableKeepAlivePolicy() {
   return {
@@ -42445,7 +42449,7 @@ function requestToOptions(request) {
   };
 }
 
-// node_modules/.pnpm/@azure+core-http-compat@2.5.0_@azure+core-client@1.11.1_@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-http-compat/dist/esm/util.js
+// node_modules/.pnpm/@azure+core-http-compat@2.5.0_@azure+core-client@1.11.1_@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-http-compat/dist/esm/util.js
 var originalRequestSymbol2 = /* @__PURE__ */ Symbol("Original PipelineRequest");
 var originalClientRequestSymbol = /* @__PURE__ */ Symbol.for("@azure/core-client original request");
 var passThroughProps = /* @__PURE__ */ new Set([
@@ -42681,7 +42685,7 @@ var HttpHeaders = class _HttpHeaders {
   }
 };
 
-// node_modules/.pnpm/@azure+core-http-compat@2.5.0_@azure+core-client@1.11.1_@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-http-compat/dist/esm/response.js
+// node_modules/.pnpm/@azure+core-http-compat@2.5.0_@azure+core-client@1.11.1_@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-http-compat/dist/esm/response.js
 var originalResponse = /* @__PURE__ */ Symbol("Original FullOperationResponse");
 function toCompatResponse(response, options) {
   let request = toWebResourceLike(response.request);
@@ -42731,7 +42735,7 @@ function toPipelineResponse(compatResponse) {
   }
 }
 
-// node_modules/.pnpm/@azure+core-http-compat@2.5.0_@azure+core-client@1.11.1_@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-http-compat/dist/esm/extendedClient.js
+// node_modules/.pnpm/@azure+core-http-compat@2.5.0_@azure+core-client@1.11.1_@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-http-compat/dist/esm/extendedClient.js
 var ExtendedServiceClient = class extends ServiceClient {
   constructor(options) {
     super(options);
@@ -42774,7 +42778,7 @@ var ExtendedServiceClient = class extends ServiceClient {
   }
 };
 
-// node_modules/.pnpm/@azure+core-http-compat@2.5.0_@azure+core-client@1.11.1_@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-http-compat/dist/esm/policies/requestPolicyFactoryPolicy.js
+// node_modules/.pnpm/@azure+core-http-compat@2.5.0_@azure+core-client@1.11.1_@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-http-compat/dist/esm/policies/requestPolicyFactoryPolicy.js
 var HttpPipelineLogLevel;
 (function(HttpPipelineLogLevel2) {
   HttpPipelineLogLevel2[HttpPipelineLogLevel2["ERROR"] = 1] = "ERROR";
@@ -42811,7 +42815,7 @@ function createRequestPolicyFactoryPolicy(factories) {
   };
 }
 
-// node_modules/.pnpm/@azure+core-http-compat@2.5.0_@azure+core-client@1.11.1_@azure+core-rest-pipeline@1.23.0/node_modules/@azure/core-http-compat/dist/esm/httpClientAdapter.js
+// node_modules/.pnpm/@azure+core-http-compat@2.5.0_@azure+core-client@1.11.1_@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-http-compat/dist/esm/httpClientAdapter.js
 function convertHttpClient(requestPolicyClient) {
   return {
     sendRequest: async (request) => {
@@ -50350,88 +50354,11 @@ var SMRegion2;
   SMRegion3[SMRegion3["SegmentContent"] = 4] = "SegmentContent";
 })(SMRegion2 || (SMRegion2 = {}));
 
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/log.js
-var logger5 = createClientLogger2("core-rest-pipeline");
-
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/util/userAgentPlatform.js
-function getHeaderName3() {
-  return "User-Agent";
-}
-
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/util/userAgent.js
-function getUserAgentHeaderName3() {
-  return getHeaderName3();
-}
-
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/userAgentPolicy.js
-var UserAgentHeaderName3 = getUserAgentHeaderName3();
-
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/restError.js
-var RestError3 = RestError;
-function isRestError3(e) {
-  return isRestError(e);
-}
-
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/util/wrapAbortSignal.js
-function wrapAbortSignalLike2(abortSignalLike) {
-  if (abortSignalLike instanceof AbortSignal) {
-    return { abortSignal: abortSignalLike };
-  }
-  if (abortSignalLike.aborted) {
-    return {
-      abortSignal: AbortSignal.abort("reason" in abortSignalLike ? abortSignalLike.reason : void 0)
-    };
-  }
-  const controller = new AbortController();
-  let needsCleanup = true;
-  function cleanup() {
-    if (needsCleanup) {
-      abortSignalLike.removeEventListener("abort", listener);
-      needsCleanup = false;
-    }
-  }
-  function listener() {
-    controller.abort("reason" in abortSignalLike ? abortSignalLike.reason : void 0);
-    cleanup();
-  }
-  abortSignalLike.addEventListener("abort", listener);
-  return { abortSignal: controller.signal, cleanup };
-}
-
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/defaultHttpClient.js
-function createDefaultHttpClient3() {
-  const client = createDefaultHttpClient();
-  return {
-    async sendRequest(request) {
-      const { abortSignal, cleanup } = request.abortSignal ? wrapAbortSignalLike2(request.abortSignal) : {};
-      try {
-        request.abortSignal = abortSignal;
-        return await client.sendRequest(request);
-      } finally {
-        cleanup?.();
-      }
-    }
-  };
-}
-
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/policies/retryPolicy.js
-var retryPolicyLogger3 = createClientLogger2("core-rest-pipeline retryPolicy");
-
-// node_modules/.pnpm/@azure+core-rest-pipeline@1.25.0/node_modules/@azure/core-rest-pipeline/dist/esm/util/tokenCycler.js
-var DEFAULT_CYCLER_OPTIONS2 = {
-  forcedRefreshWindowInMs: 1e3,
-  // Force waiting for a refresh 1s before the token expires
-  retryIntervalInMs: 3e3,
-  // Allow refresh attempts every 3s
-  refreshWindowInMs: 1e3 * 60 * 2
-  // Start refreshing 2m before expiry
-};
-
 // node_modules/.pnpm/@azure+storage-common@12.5.0_@azure+core-client@1.11.1/node_modules/@azure/storage-common/dist/esm/cache.js
 var _defaultHttpClient;
 function getCachedDefaultHttpClient2() {
   if (!_defaultHttpClient) {
-    _defaultHttpClient = createDefaultHttpClient3();
+    _defaultHttpClient = createDefaultHttpClient2();
   }
   return _defaultHttpClient;
 }
@@ -51269,7 +51196,7 @@ var StorageSharedKeyCredential = class extends Credential {
 };
 
 // node_modules/.pnpm/@azure+storage-common@12.5.0_@azure+core-client@1.11.1/node_modules/@azure/storage-common/dist/esm/log.js
-var logger6 = createClientLogger2("storage-common");
+var logger5 = createClientLogger2("storage-common");
 
 // node_modules/.pnpm/@azure+storage-common@12.5.0_@azure+core-client@1.11.1/node_modules/@azure/storage-common/dist/esm/policies/StorageRetryPolicyType.js
 var StorageRetryPolicyType;
@@ -51341,14 +51268,14 @@ var StorageRetryPolicy = class extends BaseRequestPolicy {
     }
     let response;
     try {
-      logger6.info(`RetryPolicy: =====> Try=${attempt} ${isPrimaryRetry ? "Primary" : "Secondary"}`);
+      logger5.info(`RetryPolicy: =====> Try=${attempt} ${isPrimaryRetry ? "Primary" : "Secondary"}`);
       response = await this._nextPolicy.sendRequest(newRequest);
       if (!this.shouldRetry(isPrimaryRetry, attempt, response)) {
         return response;
       }
       secondaryHas404 = secondaryHas404 || !isPrimaryRetry && response.status === 404;
     } catch (err) {
-      logger6.error(`RetryPolicy: Caught error, message: ${err.message}, code: ${err.code}`);
+      logger5.error(`RetryPolicy: Caught error, message: ${err.message}, code: ${err.code}`);
       if (!this.shouldRetry(isPrimaryRetry, attempt, response, err)) {
         throw err;
       }
@@ -51366,7 +51293,7 @@ var StorageRetryPolicy = class extends BaseRequestPolicy {
    */
   shouldRetry(isPrimaryRetry, attempt, response, err) {
     if (attempt >= this.retryOptions.maxTries) {
-      logger6.info(`RetryPolicy: Attempt(s) ${attempt} >= maxTries ${this.retryOptions.maxTries}, no further try.`);
+      logger5.info(`RetryPolicy: Attempt(s) ${attempt} >= maxTries ${this.retryOptions.maxTries}, no further try.`);
       return false;
     }
     const retriableErrors2 = [
@@ -51384,7 +51311,7 @@ var StorageRetryPolicy = class extends BaseRequestPolicy {
     if (err) {
       for (const retriableError of retriableErrors2) {
         if (err.name.toUpperCase().includes(retriableError) || err.message.toUpperCase().includes(retriableError) || err.code && err.code.toString().toUpperCase() === retriableError) {
-          logger6.info(`RetryPolicy: Network error ${retriableError} found, will retry.`);
+          logger5.info(`RetryPolicy: Network error ${retriableError} found, will retry.`);
           return true;
         }
       }
@@ -51392,11 +51319,11 @@ var StorageRetryPolicy = class extends BaseRequestPolicy {
     if (response || err) {
       const statusCode = response ? response.status : err ? err.statusCode : 0;
       if (!isPrimaryRetry && statusCode === 404) {
-        logger6.info(`RetryPolicy: Secondary access with 404, will retry.`);
+        logger5.info(`RetryPolicy: Secondary access with 404, will retry.`);
         return true;
       }
       if (statusCode === 503 || statusCode === 500) {
-        logger6.info(`RetryPolicy: Will retry for status code ${statusCode}.`);
+        logger5.info(`RetryPolicy: Will retry for status code ${statusCode}.`);
         return true;
       }
     }
@@ -51414,7 +51341,7 @@ var StorageRetryPolicy = class extends BaseRequestPolicy {
       }
     }
     if (err?.code === "PARSE_ERROR" && err?.message.startsWith(`Error "Error: Unclosed root tag`)) {
-      logger6.info("RetryPolicy: Incomplete XML response likely due to service timeout, will retry.");
+      logger5.info("RetryPolicy: Incomplete XML response likely due to service timeout, will retry.");
       return true;
     }
     return false;
@@ -51440,7 +51367,7 @@ var StorageRetryPolicy = class extends BaseRequestPolicy {
     } else {
       delayTimeInMs = Math.random() * 1e3;
     }
-    logger6.info(`RetryPolicy: Delay for ${delayTimeInMs}ms`);
+    logger5.info(`RetryPolicy: Delay for ${delayTimeInMs}ms`);
     return delay3(delayTimeInMs, abortSignal, RETRY_ABORT_ERROR);
   }
 };
@@ -51526,29 +51453,29 @@ function storageRetryPolicy(options = {}) {
   const tryTimeoutInMs = options.tryTimeoutInMs ?? DEFAULT_RETRY_OPTIONS2.tryTimeoutInMs;
   function shouldRetry({ isPrimaryRetry, attempt, response, error: error2 }) {
     if (attempt >= maxTries) {
-      logger6.info(`RetryPolicy: Attempt(s) ${attempt} >= maxTries ${maxTries}, no further try.`);
+      logger5.info(`RetryPolicy: Attempt(s) ${attempt} >= maxTries ${maxTries}, no further try.`);
       return false;
     }
     if (error2) {
       for (const retriableError of retriableErrors) {
         if (error2.name.toUpperCase().includes(retriableError) || error2.message.toUpperCase().includes(retriableError) || error2.code && error2.code.toString().toUpperCase() === retriableError) {
-          logger6.info(`RetryPolicy: Network error ${retriableError} found, will retry.`);
+          logger5.info(`RetryPolicy: Network error ${retriableError} found, will retry.`);
           return true;
         }
       }
       if (error2?.code === "PARSE_ERROR" && error2?.message.startsWith(`Error "Error: Unclosed root tag`)) {
-        logger6.info("RetryPolicy: Incomplete XML response likely due to service timeout, will retry.");
+        logger5.info("RetryPolicy: Incomplete XML response likely due to service timeout, will retry.");
         return true;
       }
     }
     if (response || error2) {
       const statusCode = response?.status ?? error2?.statusCode ?? 0;
       if (!isPrimaryRetry && statusCode === 404) {
-        logger6.info(`RetryPolicy: Secondary access with 404, will retry.`);
+        logger5.info(`RetryPolicy: Secondary access with 404, will retry.`);
         return true;
       }
       if (statusCode === 503 || statusCode === 500) {
-        logger6.info(`RetryPolicy: Will retry for status code ${statusCode}.`);
+        logger5.info(`RetryPolicy: Will retry for status code ${statusCode}.`);
         return true;
       }
     }
@@ -51581,7 +51508,7 @@ function storageRetryPolicy(options = {}) {
     } else {
       delayTimeInMs = Math.random() * 1e3;
     }
-    logger6.info(`RetryPolicy: Delay for ${delayTimeInMs}ms`);
+    logger5.info(`RetryPolicy: Delay for ${delayTimeInMs}ms`);
     return delayTimeInMs;
   }
   return {
@@ -51603,15 +51530,15 @@ function storageRetryPolicy(options = {}) {
         response = void 0;
         error2 = void 0;
         try {
-          logger6.info(`RetryPolicy: =====> Try=${attempt} ${isPrimaryRetry ? "Primary" : "Secondary"}`);
+          logger5.info(`RetryPolicy: =====> Try=${attempt} ${isPrimaryRetry ? "Primary" : "Secondary"}`);
           response = await next(request);
           secondaryHas404 = secondaryHas404 || !isPrimaryRetry && response.status === 404;
         } catch (e) {
-          if (isRestError3(e)) {
-            logger6.error(`RetryPolicy: Caught error, message: ${e.message}, code: ${e.code}`);
+          if (isRestError2(e)) {
+            logger5.error(`RetryPolicy: Caught error, message: ${e.message}, code: ${e.code}`);
             error2 = e;
           } else {
-            logger6.error(`RetryPolicy: Caught error, message: ${getErrorMessage(e)}`);
+            logger5.error(`RetryPolicy: Caught error, message: ${getErrorMessage(e)}`);
             throw e;
           }
         }
@@ -51624,7 +51551,7 @@ function storageRetryPolicy(options = {}) {
       if (response) {
         return response;
       }
-      throw error2 ?? new RestError3("RetryPolicy failed without known error.");
+      throw error2 ?? new RestError2("RetryPolicy failed without known error.");
     }
   };
 }
@@ -51780,7 +51707,7 @@ var UserDelegationKeyCredential = class {
 };
 
 // node_modules/.pnpm/@azure+storage-blob@12.31.0/node_modules/@azure/storage-blob/dist/esm/utils/constants.js
-var SDK_VERSION4 = "12.31.0";
+var SDK_VERSION3 = "12.31.0";
 var SERVICE_VERSION = "2026-02-06";
 var BLOCK_BLOB_MAX_UPLOAD_BLOB_BYTES = 256 * 1024 * 1024;
 var BLOCK_BLOB_MAX_STAGE_BLOCK_BYTES = 4e3 * 1024 * 1024;
@@ -52044,7 +51971,7 @@ function getCoreClientOptions(pipeline2) {
   }
   let corePipeline = pipeline2._corePipeline;
   if (!corePipeline) {
-    const packageDetails = `azsdk-js-azure-storage-blob/${SDK_VERSION4}`;
+    const packageDetails = `azsdk-js-azure-storage-blob/${SDK_VERSION3}`;
     const userAgentPrefix = restOptions.userAgentOptions && restOptions.userAgentOptions.userAgentPrefix ? `${restOptions.userAgentOptions.userAgentPrefix} ${packageDetails}` : `${packageDetails}`;
     corePipeline = createClientPipeline({
       ...restOptions,
@@ -66039,7 +65966,7 @@ var StorageClient2 = class {
 // node_modules/.pnpm/@azure+storage-blob@12.31.0/node_modules/@azure/storage-blob/dist/esm/utils/tracing.js
 var tracingClient = createTracingClient({
   packageName: "@azure/storage-blob",
-  packageVersion: SDK_VERSION4,
+  packageVersion: SDK_VERSION3,
   namespace: "Microsoft.Storage"
 });
 
@@ -69022,7 +68949,7 @@ function rangeResponseFromModel(response) {
 }
 
 // node_modules/.pnpm/@azure+core-lro@2.7.2/node_modules/@azure/core-lro/dist/esm/logger.js
-var logger7 = createClientLogger2("core-lro");
+var logger6 = createClientLogger2("core-lro");
 
 // node_modules/.pnpm/@azure+core-lro@2.7.2/node_modules/@azure/core-lro/dist/esm/legacy/poller.js
 var PollerStoppedError = class _PollerStoppedError extends Error {

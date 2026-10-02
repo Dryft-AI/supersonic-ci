@@ -23,6 +23,10 @@ inputs:
     description: Stop this job's running step when a newer push changes the lane. Linux runners only.
     required: false
     default: "true"
+  shared:
+    description: Also save the pass where check with shared set can find it from any branch, as a 7-day artifact named after the pass.
+    required: false
+    default: "false"
   poll-seconds:
     description: How often the watcher checks for a newer push.
     required: false

@@ -3,6 +3,7 @@ import { dirname } from "node:path";
 import * as cache from "@actions/cache";
 import * as core from "@actions/core";
 import { PASS_PATH } from "./lanes.js";
+import { uploadSharedPass } from "./shared.js";
 
 function stopWatcher(): void {
   const pid = Number(core.getState("watcher"));
@@ -29,6 +30,13 @@ async function run(): Promise<void> {
     core.info(`Recorded ${key} as passed.`);
   } catch (error) {
     core.info(`Did not record ${key}: ${error}`);
+  }
+  if (core.getState("shared") !== "true") return;
+  try {
+    await uploadSharedPass(key);
+    core.info(`Shared ${key} with every branch.`);
+  } catch (error) {
+    core.info(`Did not share ${key}: ${error}`);
   }
 }
 

@@ -111511,7 +111511,7 @@ async function run() {
     passed[lane.name] = ok2;
     setOutput(`${lane.name}-hash`, hash);
     setOutput(`${lane.name}-passed`, String(ok2));
-    info(`${lane.name}: ${ok2 ? `already passed (${source}), ci is supersonic!` : "not passed yet, run"} (${hash || "no hash"})`);
+    info(`${lane.name}: ${ok2 ? `ci went supersonic (pass was previously cached)` : "not passed yet, run"} (${hash || "no hash"})`);
     rows.push([lane.name, hash || "none", ok2 ? `skip, already passed (${source})` : "run"]);
   }
   setOutput("hashes", JSON.stringify(hashes));

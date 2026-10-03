@@ -57,7 +57,7 @@ async function run(): Promise<void> {
     passed[lane.name] = ok;
     core.setOutput(`${lane.name}-hash`, hash);
     core.setOutput(`${lane.name}-passed`, String(ok));
-    core.info(`${lane.name}: ${ok ? `already passed (${source}), skip` : "not passed yet, run"} (${hash || "no hash"})`);
+    core.info(`${lane.name}: ${ok ? `already passed (${source}), ci is supersonic!` : "not passed yet, run"} (${hash || "no hash"})`);
     rows.push([lane.name, hash || "none", ok ? `skip, already passed (${source})` : "run"]);
   }
   core.setOutput("hashes", JSON.stringify(hashes));

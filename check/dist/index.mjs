@@ -111455,15 +111455,19 @@ If the error persists, please check whether Actions and API requests are operati
 var client = new DefaultArtifactClient();
 
 // src/shared.ts
-function hasLivePass(list, key) {
-  return (list.artifacts ?? []).some((a) => a.name === key && !a.expired);
+function hasLivePass(list, key, repoId) {
+  return (list.artifacts ?? []).some(
+    (a) => a.name === key && !a.expired && a.workflow_run?.repository_id === repoId && a.workflow_run?.head_repository_id === repoId
+  );
 }
 async function sharedPassExists(key, token) {
+  const repoId = Number(process.env.GITHUB_REPOSITORY_ID);
+  if (!repoId) throw new Error("GITHUB_REPOSITORY_ID is not set");
   const api = process.env.GITHUB_API_URL ?? "https://api.github.com";
   const url2 = `${api}/repos/${process.env.GITHUB_REPOSITORY}/actions/artifacts?name=${encodeURIComponent(key)}&per_page=10`;
   const res = await fetch(url2, { headers: { authorization: `Bearer ${token}`, accept: "application/vnd.github+json" } });
   if (!res.ok) throw new Error(`artifacts lookup returned ${res.status}`);
-  return hasLivePass(await res.json(), key);
+  return hasLivePass(await res.json(), key, repoId);
 }
 
 // src/check.ts

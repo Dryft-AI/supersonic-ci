@@ -112,7 +112,7 @@ Cache scoping means a push to main never sees a pass from the pull request that 
 
 `record` then also uploads a one-line artifact named `<key-prefix>-<lane>-<hash>`, kept for 7 days. When the cache has no record, `check` asks the repository's artifacts API for an unexpired artifact with exactly that name. The lookup needs `actions: read`. Artifacts are not routed through runner caches such as Blacksmith's, so this also works where cache records stay on the runner provider's side.
 
-Any workflow in the repository can upload an artifact with any name, so a shared pass is only as trustworthy as the workflows that can run in the repository. Leave it off where pull requests from forks run CI.
+A pull request from a fork runs the fork's own workflow files, which can upload an artifact with any name. `check` only counts artifacts from runs on the repository's own branches, so a pass recorded by a fork's pull request never counts. Any workflow on those branches can still upload any name, so a shared pass is only as trustworthy as those workflows.
 
 ## What it doesn't do
 

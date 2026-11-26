@@ -1,6 +1,7 @@
 import * as cache from "@actions/cache";
 import * as core from "@actions/core";
 import { laneHash, parseLanes, PASS_PATH, passKey } from "./lanes.js";
+import { saveNote } from "./notes.js";
 import { sharedPassExists } from "./shared.js";
 
 async function inCache(key: string): Promise<boolean> {
@@ -53,6 +54,7 @@ async function run(): Promise<void> {
             ? "shared store"
             : undefined;
     const ok = source !== undefined;
+    if (source === "shared store" && cacheAvailable) await saveNote(key);
     hashes[lane.name] = hash;
     passed[lane.name] = ok;
     core.setOutput(`${lane.name}-hash`, hash);
